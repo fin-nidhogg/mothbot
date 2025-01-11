@@ -1,0 +1,21 @@
+{
+  "name": "axolbot",
+  "version": "1.0.0",
+  "description": "A discord bot for very special community <3",
+  "main": "main.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "bot",
+    "axolotl",
+    "discord"
+  ],
+  "author": "Pretelea Nidhogg",
+  "license": "ISC",
+  "dependencies": {
+    "axolbot": "file:",
+    "discord.js": "^14.14.1",
+    "dotenv": "^16.4.5"
+  }
+}
