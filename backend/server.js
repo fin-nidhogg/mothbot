@@ -52,6 +52,11 @@ app.post('/add', async (req, res) => {
                 setDefaultsOnInsert: true, // set default values
             }
         );
+        // send response to client
+        res.status(200).json({
+            message: 'Document updated or created successfully',
+            data: updatedStats,
+        });
 
     } catch (err) {
         console.error('Error updating stats:', err);
@@ -60,8 +65,6 @@ app.post('/add', async (req, res) => {
 });
 
 // Start server
-const PORT = process.env.SERVER_PORT || 6969;
-
-app.listen(PORT, () => {
-    console.log(`Server is running on port ${PORT}`);
+app.listen(process.env.SERVER_PORT, () => {
+    console.log(`Server is running on port ${process.env.SERVER_PORT}`);
 });
