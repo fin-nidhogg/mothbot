@@ -52,7 +52,8 @@ app.post('/add', async (req, res) => {
                 setDefaultsOnInsert: true, // set default values
             }
         );
-        // send response to client
+
+        // send response to client after succesfully updating or creating the document
         res.status(200).json({
             message: 'Document updated or created successfully',
             data: updatedStats,
