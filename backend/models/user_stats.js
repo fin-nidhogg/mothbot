@@ -1,4 +1,5 @@
 const mongoose = require('mongoose');
+const moment = require('moment');
 
 // Define the schema for user statistics
 const userStatsSchema = new mongoose.Schema({
@@ -33,9 +34,9 @@ const userStatsSchema = new mongoose.Schema({
         default: '',
     },
     date: {
-        type: Date,
+        type: String,
         required: true,
-        default: Date.now,
+        default: () => moment().format('DD-MM-YYYY'),
     },
     messageCount: {
         type: Number,
