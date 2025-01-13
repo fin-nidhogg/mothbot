@@ -4,14 +4,12 @@ const moment = require('moment');
 // Define the schema for user statistics
 const userStatsSchema = new mongoose.Schema({
     guildId: {
-        type: Number,
+        type: String,
         required: true,
-        trim: true,
     },
     channelId: {
-        type: Number,
+        type: String,
         required: true,
-        trim: true,
     },
     channelName: {
         type: String,
@@ -19,9 +17,8 @@ const userStatsSchema = new mongoose.Schema({
         trim: true,
     },
     userId: {
-        type: Number,
+        type: String,
         required: true,
-        trim: true,
     },
     username: {
         type: String,
