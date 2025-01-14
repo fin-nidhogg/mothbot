@@ -1,6 +1,7 @@
 // Require the necessary modules for basic functionality
 require('dotenv').config()
 const { Client, Events, GatewayIntentBits } = require('discord.js');
+const moment = require('moment');
 const axios = require('axios');
 
 // Create a new client instance
@@ -29,7 +30,8 @@ async function sendPostRequest(guildId, channelId, channelName, userId, username
             userId,
             username,
             nickname,
-            date: date
+            date,
+            dateString,
         });
         console.log('Data sent successfully:', response.status + ' ' + response.statusText);
     } catch (error) {
@@ -37,8 +39,7 @@ async function sendPostRequest(guildId, channelId, channelName, userId, username
     }
 }
 
-
-// Listen and log messagecounts to mongodb
+// Listen and log messages to mongodb
 client.on('messageCreate', message => {
     // Prevent the bot from responding and counting its own messages
     if (message.author.bot) return;
@@ -51,8 +52,9 @@ client.on('messageCreate', message => {
     const username = message.author.username;
     const nickname = message.member ? message.member.displayName : null;
     const date = Date.now();
+    const dateString = moment(date).format('YYYYMMDD');
 
-    sendPostRequest(guildId, channelId, channelName, userId, username, nickname, date);
+    sendPostRequest(guildId, channelId, channelName, userId, username, nickname, date, dateString);
 });
 
 // Log in to Discord with client's token
