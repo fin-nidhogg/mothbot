@@ -35,6 +35,11 @@ const userStatsSchema = new mongoose.Schema({
         required: true,
         default: Date.now,
     },
+    dateString: {
+        type: String,
+        required: true,
+        default: () => moment().format('YYYYMMDD'),
+    },
     messageCount: {
         type: Number,
         required: true,

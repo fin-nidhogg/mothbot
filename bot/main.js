@@ -52,7 +52,7 @@ client.on('messageCreate', message => {
     const username = message.author.username;
     const nickname = message.member ? message.member.displayName : null;
     const date = Date.now();
-    const dateString = moment(date).format('YYYYMMDD');
+    const dateString = moment().format('YYYYMMDD');
 
     sendPostRequest(guildId, channelId, channelName, userId, username, nickname, date, dateString);
 });

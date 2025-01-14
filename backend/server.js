@@ -32,7 +32,7 @@ app.post('/add', async (req, res) => {
         // }
 
         // Deconstruct the request body and create a new document or update an existing one
-        const { guildId, channelId, channelName, userId, username, nickname, date } = req.body;
+        const { guildId, channelId, channelName, userId, username, nickname, dateString } = req.body;
         const updatedStats = await UserStats.findOneAndUpdate(
             {
                 guildId,
@@ -41,7 +41,7 @@ app.post('/add', async (req, res) => {
                 userId,
                 username,
                 nickname,
-                date
+                dateString
             }, // Search criteria
             {
                 $inc: { messageCount: 1 }, // Increment messageCount by 1
