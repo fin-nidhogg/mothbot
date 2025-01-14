@@ -2,7 +2,6 @@
 require('dotenv').config()
 const { Client, Events, GatewayIntentBits } = require('discord.js');
 const axios = require('axios');
-const moment = require('moment');
 
 // Create a new client instance
 const client = new Client({
@@ -51,7 +50,7 @@ client.on('messageCreate', message => {
     const userId = message.author.id;
     const username = message.author.username;
     const nickname = message.member ? message.member.displayName : null;
-    const date = moment().format('DD-MM-YYYY');
+    const date = Date.now();
 
     sendPostRequest(guildId, channelId, channelName, userId, username, nickname, date);
 });
