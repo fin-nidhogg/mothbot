@@ -28,7 +28,7 @@ app.post('/add', async (req, res) => {
         //   userId: string,
         //   username: string,
         //   nickname: string,
-        //   date: string
+        //   date: Date,
         // }
 
         // Deconstruct the request body and create a new document or update an existing one
