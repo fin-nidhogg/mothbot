@@ -1,7 +1,6 @@
 // Require the necessary modules for basic functionality
 require('dotenv').config()
 const { Client, Events, GatewayIntentBits } = require('discord.js');
-const moment = require('moment');
 const axios = require('axios');
 
 // Create a new client instance
@@ -20,7 +19,7 @@ client.once(Events.ClientReady, readyClient => {
 });
 
 // Function to send a POST request to the backend
-async function sendPostRequest(guildId, channelId, channelName, userId, username, nickname, date) {
+async function sendPostRequest(guildId, channelId, channelName, userId, username, nickname) {
 
     try {
         const response = await axios.post('http://localhost:6969/add', {
@@ -30,8 +29,6 @@ async function sendPostRequest(guildId, channelId, channelName, userId, username
             userId,
             username,
             nickname,
-            date,
-            dateString,
         });
         console.log('Data sent successfully:', response.status + ' ' + response.statusText);
     } catch (error) {
@@ -51,10 +48,8 @@ client.on('messageCreate', message => {
     const userId = message.author.id;
     const username = message.author.username;
     const nickname = message.member ? message.member.displayName : null;
-    const date = Date.now();
-    const dateString = moment().format('YYYYMMDD');
 
-    sendPostRequest(guildId, channelId, channelName, userId, username, nickname, date, dateString);
+    sendPostRequest(guildId, channelId, channelName, userId, username, nickname);
 });
 
 // Log in to Discord with client's token

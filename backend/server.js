@@ -1,8 +1,12 @@
 const express = require('express');
+const moment = require('moment');
 const UserStats = require('./models/user_stats');
 const app = express();
 const helmet = require('helmet');
+
+// Require the database connection file
 const dbConnection = require('./dbConnection');
+
 
 // Add helmet middleware to secure the Express app
 app.use(helmet());
@@ -28,11 +32,15 @@ app.post('/add', async (req, res) => {
         //   userId: string,
         //   username: string,
         //   nickname: string,
-        //   date: Date,
         // }
 
         // Deconstruct the request body and create a new document or update an existing one
-        const { guildId, channelId, channelName, userId, username, nickname, dateString } = req.body;
+        const { guildId, channelId, channelName, userId, username, nickname } = req.body;
+
+        // Get the current date in 'YYYYMMDD' format for easier searches since full date is created by default in the model
+        const dateString = moment().format('YYYYMMDD');
+
+        // Find and update the document if it exists, otherwise create a new one
         const updatedStats = await UserStats.findOneAndUpdate(
             {
                 guildId,
@@ -41,10 +49,10 @@ app.post('/add', async (req, res) => {
                 userId,
                 username,
                 nickname,
-                dateString
+                dateString,
             }, // Search criteria
             {
-                $inc: { messageCount: 1 }, // Increment messageCount by 1
+                $inc: { messageCount: 1 }, // If existing document found, increment messageCount by 1
             },
             {
                 new: true, // Return the updated document
