@@ -73,6 +73,46 @@ app.post('/add', async (req, res) => {
     }
 });
 
+// Route for fetching user activity
+app.get('/stats/', async (req, res) => {
+    const username = req.query.username;
+    const userId = req.query.userid;
+    const startDate = req.query.start;
+    const endDate = req.query.end;
+
+    // Query object
+    const query = {
+        $or: [
+            { username: username },
+            { userId: userId }
+        ]
+    };
+
+    // Add date range to query if start and end dates are provided
+    if (startDate && endDate) {
+        const start = moment(startDate, 'YYYYMMDD').startOf('day').toDate();
+        const end = moment(endDate, 'YYYYMMDD').endOf('day').toDate();
+        query.date = {
+            $gte: start,
+            $lte: end,
+        };
+    }
+
+    // Query the database
+    try {
+        const userActivity = await UserStats.find(query);
+
+        if (userActivity.length === 0) {
+            return res.status(404).json({ message: 'No user activity found' });
+        }
+
+        res.status(200).json(userActivity);
+    } catch (err) {
+        console.error('Error fetching user activity:', err);
+        res.status(500).send('Internal server error');
+    }
+});
+
 // Start server
 app.listen(process.env.SERVER_PORT, () => {
     console.log(`Server is running on port ${process.env.SERVER_PORT}`);
