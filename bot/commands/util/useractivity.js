@@ -52,7 +52,10 @@ module.exports = {
             // Send the message to the user as an ephemeral message
             return interaction.reply({ content: `User activity for ${username}:\n${activityMessage}`, flags: MessageFlags.Ephemeral });
         } catch (error) {
-            console.error('Error fetching user activity:', error);
+            if (error.response && error.response.status === 404) {
+                return interaction.reply({ content: 'No user activity found', flags: MessageFlags.Ephemeral });
+            }
+            console.error('Error fetching user activity:', error.response.data.message);
             return interaction.reply({ content: 'Internal server error', flags: MessageFlags.Ephemeral });
         }
     },
