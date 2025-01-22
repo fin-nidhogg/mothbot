@@ -73,7 +73,7 @@ app.post('/add', async (req, res) => {
     }
 });
 
-// Route for fetching user activity
+// Route for fetching full user activity
 app.get('/stats/', async (req, res) => {
     const username = req.query.username;
     const userId = req.query.userid;
@@ -96,11 +96,67 @@ app.get('/stats/', async (req, res) => {
             $gte: start,
             $lte: end,
         };
+
     }
 
     // Query the database
     try {
         const userActivity = await UserStats.find(query);
+
+        if (userActivity.length === 0) {
+            return res.status(404).json({ message: 'No user activity found' });
+        }
+
+        res.status(200).json(userActivity);
+    } catch (err) {
+        console.error('Error fetching user activity:', err);
+        res.status(500).send('Internal server error');
+    }
+});
+
+// Route for fetching users top channels by message count
+app.get('/top-channels/', async (req, res) => {
+    const username = req.query.username;
+    const userId = req.query.userid;
+    const startDate = req.query.start;
+    const endDate = req.query.end;
+
+    // Build the query object
+    const query = {
+        $or: [
+            { username: username },
+            { userId: userId }
+        ]
+    };
+
+    // Add date range to query if startDate and endDate are provided and valid
+    if (startDate && endDate) {
+        const start = moment(startDate, 'YYYYMMDD').startOf('day').toDate();
+        const end = moment(endDate, 'YYYYMMDD').endOf('day').toDate();
+
+        if (!isNaN(start) && !isNaN(end)) {
+            query.date = {
+                $gte: start,
+                $lte: end,
+            };
+        } else {
+            return res.status(400).json({ message: 'Invalid date format' });
+        }
+    }
+
+    // Debuggausta varten. Kommentoi ulos tuotannossa
+    // console.log('Constructed query:', query); // Log the query
+
+    // Query the database
+    try {
+        // Aggregate user message counts by channel
+        const userActivity = await UserStats.aggregate([
+            { $match: query },
+            { $group: { _id: { channelId: "$channelId", channelName: "$channelName" }, messageCount: { $sum: "$messageCount" } } },
+            { $sort: { messageCount: -1 } },
+            { $limit: 5 },
+            { $project: { _id: 0, channelName: "$_id.channelName", messageCount: 1 } }
+        ]);
 
         if (userActivity.length === 0) {
             return res.status(404).json({ message: 'No user activity found' });
