@@ -1,4 +1,4 @@
-const { SlashCommandBuilder, Message, MessageFlags } = require('discord.js');
+const { SlashCommandBuilder, MessageFlags } = require('discord.js');
 
 const message =
     `Hello! I am the Axolbot! As your humble servant, I am here to assist you with all your temple needs!
