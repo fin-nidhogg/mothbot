@@ -111,6 +111,23 @@ client.on(Events.InteractionCreate, async interaction => {
     }
 });
 
+// event listener for autocompleting usernames
+client.on('interactionCreate', async interaction => {
+    if (!interaction.isAutocomplete()) return;
+
+    const focusedOption = interaction.options.getFocused(true);
+
+    if (focusedOption.name === 'username') {
+        const guild = interaction.guild;
+        const members = await guild.members.fetch();
+        const choices = members.map(member => member.user.username);
+
+        const filtered = choices.filter(choice => choice.toLowerCase().startsWith(focusedOption.value.toLowerCase()));
+        await interaction.respond(
+            filtered.map(choice => ({ name: choice, value: choice }))
+        );
+    }
+});
 
 // Log in to Discord with client's token
 client.login(process.env.APP_TOKEN); 

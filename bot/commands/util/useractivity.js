@@ -9,7 +9,8 @@ module.exports = {
         .addStringOption(option =>
             option.setName('username')
                 .setDescription('he user to check activity for.')
-                .setRequired(true))
+                .setRequired(true)
+                .setAutocomplete(true))
         .addStringOption(option =>
             option.setName('start')
                 .setDescription('Earliest date to include (YYYYMMDD).')
