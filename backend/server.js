@@ -129,10 +129,10 @@ app.get('/top-channels/', async (req, res) => {
         ]
     };
 
-    // Add date range to query if startDate and endDate are provided and valid
-    if (startDate && endDate) {
-        const start = moment(startDate, 'YYYYMMDD').startOf('day').toDate();
-        const end = moment(endDate, 'YYYYMMDD').endOf('day').toDate();
+    // Add date range to query if startDate and/or endDate are provided
+    if (startDate || endDate) {
+        const start = startDate ? moment(startDate, 'YYYYMMDD').startOf('day').toDate() : new Date(0); // Oldest possible date if startDate is not provided
+        const end = endDate ? moment(endDate, 'YYYYMMDD').endOf('day').toDate() : moment().endOf('day').toDate(); // Today's date if endDate is not provided
 
         if (!isNaN(start) && !isNaN(end)) {
             query.date = {
