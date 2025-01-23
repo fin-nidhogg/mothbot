@@ -28,8 +28,9 @@ module.exports = {
 
         // Try to fetch user activity from the backend
         try {
-
-            const response = await axios.get(`${API_URL}:${API_PORT}/top-channels/`, {
+            const url = process.env.API_URL;
+            const port = process.env.API_PORT;
+            const response = await axios.get(`${url}:${port}/top-channels/`, {
                 params: {
                     username: username,
                     start: start,
