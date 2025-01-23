@@ -1,6 +1,9 @@
 const { SlashCommandBuilder, Message, MessageFlags } = require('discord.js');
 const { logCommand } = require('../../logger');
 
+const helpchannel = process.env.HELP_CHANNEL_ID;
+const questionschannel = process.env.QUESTIONS_CHANNEL_ID;
+
 module.exports = {
     data: new SlashCommandBuilder()
         .setName('help')
@@ -20,7 +23,7 @@ module.exports = {
     :butterfly:     **[Reality shaping](https://templeofchrysalis.com/reality-shaping/)**
     :butterfly:     **[Chrysoteria](https://templeofchrysalis.com/chrysoteria/)**
     
-    Don't forget to check out the <#$CHANNEL_ID> and <#CHANNEL_ID> channels for more information!`;
+    Don't forget to check out the <#${helpchannel}> and <#${questionschannel}> channels for more information!`;
 
         await interaction.reply({ content: message, flags: MessageFlags.Ephemeral });
     }

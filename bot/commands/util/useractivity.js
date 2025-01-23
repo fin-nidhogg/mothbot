@@ -8,7 +8,7 @@ module.exports = {
         .setDescription('Provides activity information about the user.')
         .addStringOption(option =>
             option.setName('username')
-                .setDescription('he user to check activity for.')
+                .setDescription('Target user to check activity for.')
                 .setRequired(true)
                 .setAutocomplete(true))
         .addStringOption(option =>
