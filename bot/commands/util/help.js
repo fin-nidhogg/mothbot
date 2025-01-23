@@ -1,10 +1,12 @@
 const { SlashCommandBuilder, Message, MessageFlags } = require('discord.js');
+const { logCommand } = require('../../logger');
 
 module.exports = {
     data: new SlashCommandBuilder()
         .setName('help')
         .setDescription('Give some initial help to the user ie. where to find info about temple'),
     async execute(interaction) {
+        logCommand('help', interaction.user.username);
         const botname = interaction.client.user.username;
         const message =
             `Hello! I am the ${botname}! As your humble servant, I am here to assist you with all your temple needs!

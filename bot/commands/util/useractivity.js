@@ -1,6 +1,6 @@
 const { SlashCommandBuilder, MessageFlags, EntryPointCommandHandlerType } = require('discord.js');
 const axios = require('axios');
-const { startSession } = require('../../../backend/models/user_stats');
+const { logCommand } = require('../../logger');
 
 module.exports = {
     data: new SlashCommandBuilder()
@@ -36,8 +36,12 @@ module.exports = {
                 },
             });
             const userActivity = response.data;
-            // Log the response for debugging
+
+            // Debuggaukseen, kommentoi ulos tuotannossa
             //console.log('User activity:', userActivity);
+
+            // Get the user who requested the activity and write it to logfile  
+            logCommand('useractivity', interaction.user.username, { username, start, end });
 
             // API Should handle empty responses and return a "No user activity found" message, but we'll check here just in case
             if (userActivity.length === 0) {
