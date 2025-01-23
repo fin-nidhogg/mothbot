@@ -53,9 +53,10 @@ client.once(Events.ClientReady, readyClient => {
 
 // Function to send a POST request to the backend
 async function sendPostRequest(guildId, channelId, channelName, userId, username, nickname) {
-
+    const api_url = process.env.API_URL;
+    const api_port = process.env.API_PORT;
     try {
-        const response = await axios.post('http://localhost:6969/add', {
+        const response = await axios.post(`${api_url}:${api_port}/add`, {
             guildId,
             channelId,
             channelName,
