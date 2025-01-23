@@ -8,6 +8,9 @@ const path = require('node:path');
 const { Client, Collection, Events, GatewayIntentBits, MessageFlags } = require('discord.js');
 const axios = require('axios');
 
+// Ruma fetch viesteille.... vain kertaalleen....
+// const { handleFetchMessages } = require('./fetchmessages');
+
 //////////////////////////////////////
 // Client section
 //////////////////////////////////////
@@ -75,9 +78,16 @@ async function sendPostRequest(guildId, channelId, channelName, userId, username
 //////////////////////////////////////
 
 // Listen and log messages to mongodb
-client.on('messageCreate', message => {
+client.on('messageCreate', async message => {
     // Prevent the bot from responding and counting its own messages
     if (message.author.bot) return;
+
+    // HITON VAARALLINEN KOMENTO, KÄYTÄ VAIN TESTAUKSEEN! KOMMENTOI ULOS ASAP!
+    /*     if (message.content === '!fetchmessages') {
+            await message.reply('Aloitetaan viestihistorian hakeminen...');
+            await handleFetchMessages(message);
+            await message.reply('Viestihistoria on käsitelty ja tallennettu MongoDB:hen.');
+        } */
 
     console.log(`Message received from user ${message.author.id}`);
     const guildId = message.guildId;
