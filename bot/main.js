@@ -2,13 +2,19 @@
 // Imports section
 //////////////////////////////////////
 
-require('dotenv').config()
 const fs = require('node:fs');
 const path = require('node:path');
 const { Client, Collection, Events, GatewayIntentBits, MessageFlags } = require('discord.js');
 const axios = require('axios');
 
-// Ruma fetch viesteille.... vain kertaalleen....
+// Load environment variables depending on the environment
+const envFile = process.env.NODE_ENV === 'production' ? '.env.production' : '.env.development';
+require('dotenv').config({ path: envFile });
+
+/* Really ugly way to fetch initial messages, should be refactored. 
+Run only once for initial db population and comment out. 
+Also remember comment out the function call from line 92 */
+
 // const { handleFetchMessages } = require('./fetchmessages');
 
 //////////////////////////////////////
