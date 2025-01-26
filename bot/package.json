@@ -4,8 +4,10 @@
   "description": "A discord bot for very special community <3",
   "main": "bot.js",
   "scripts": {
-    "start:dev": "cross-env NODE_ENV=development node bot.js",
-    "start:prod": "cross-env NODE_ENV=production node bot.js"
+    "start:dev-win": "cross-env NODE_ENV=development node bot.js",
+    "start:prod-win": "cross-env NODE_ENV=production node bot.js",
+    "start:dev": "NODE_ENV=development node bot.js",
+    "start:prod": "NODE_ENV=production node bot.js"
   },
   "keywords": [
     "bot",
