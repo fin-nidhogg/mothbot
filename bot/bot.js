@@ -88,7 +88,7 @@ client.on('messageCreate', async message => {
     // Prevent the bot from responding and counting its own messages
     if (message.author.bot) return;
 
-    // HITON VAARALLINEN KOMENTO, KÄYTÄ VAIN TESTAUKSEEN! KOMMENTOI ULOS ASAP!
+    // Do not use this in production, only for initial db population
     /*     if (message.content === '!fetchmessages') {
             await message.reply('Aloitetaan viestihistorian hakeminen...');
             await handleFetchMessages(message);
