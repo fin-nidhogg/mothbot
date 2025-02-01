@@ -1,0 +1,50 @@
+name: Deploy to Server
+
+on:
+  push:
+    branches:
+      - main
+      - development
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v3
+
+      - name: Setup SSH
+        uses: webfactory/ssh-agent@v0.7.0
+        with:
+          ssh-private-key: ${{ secrets.DEPLOY_KEY }}
+          ssh-passphrase: ${{ secrets.SSH_PASSPHRASE }}
+
+      - name: Deploy to Server
+        env:
+          BRANCH_NAME: ${{ github.ref_name }}
+        run: |
+          echo "Deploying branch: $BRANCH_NAME"
+
+          # Set server details
+          SERVER_USER=tranceenergie
+          SERVER_HOST=apkio.fi
+
+          # Set the correct path for the ecosystem config file based on the branch
+          if [ "$BRANCH_NAME" == "main" ]; then
+            APP_PATH=/home/tranceenergie/deployment/mothbot/production/
+            ECOSYSTEM_CONFIG=/home/tranceenergie/deployment/mothbot/prod_ecosystem.config.js  # Full path for production config
+          else
+            APP_PATH=/home/tranceenergie/deployment/mothbot/development
+            ECOSYSTEM_CONFIG=/home/tranceenergie/deployment/mothbot/devecosystem.config.js  # Full path for development config
+          fi
+
+          # Sync code to the correct directory on the server
+          ssh $SERVER_USER@$SERVER_HOST "mkdir -p $APP_PATH"
+          rsync -avz --exclude '.git' ./ $SERVER_USER@$SERVER_HOST:$APP_PATH
+
+          # Install dependencies on the server
+          ssh $SERVER_USER@$SERVER_HOST "cd $APP_PATH && npm install"
+
+          # Start the application with PM2 using the correct ecosystem config file
+          ssh $SERVER_USER@$SERVER_HOST "cd $APP_PATH && pm2 restart $ECOSYSTEM_CONFIG || pm2 start $ECOSYSTEM_CONFIG"

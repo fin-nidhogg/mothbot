@@ -41,7 +41,7 @@ async function handleFetchMessages(message) {
 
                         messages = [...messages, ...fetchedMessages.map(msg => msg)];
                         lastMessageId = fetchedMessages.last().id;
-                    } while (messages.length < 1000); // Limit the number of messages
+                    } while (lastMessageId); // Continue until there are no more messages
 
                     // Process messages and insert/update in MongoDB
                     for (const msg of messages) {
@@ -82,12 +82,13 @@ async function handleFetchMessages(message) {
                     if (error.code === 50001) {
                         console.warn(`⚠️ No access to channel: ${channel.name} (${channel.id}), skipping.`);
                     } else {
-                        console.error(`❌ Error fetching messages from channel ${channel.name}:`, error);
+                        console.error('Error fetching messages:', error);
                     }
                 }
             }
         });
     });
+    console.log('All messages have been processed and stored in MongoDB.');
 }
 
-module.exports = { handleFetchMessages };
+module.exports = { handleFetchMessages }

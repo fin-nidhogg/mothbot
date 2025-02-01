@@ -15,7 +15,7 @@ require('dotenv').config({ path: envFile });
 Run only once for initial db population and comment out. 
 Also remember comment out the function call from line 92 */
 
-// const { handleFetchMessages } = require('./fetchmessages');
+const { handleFetchMessages } = require('./fetchmessages');
 
 //////////////////////////////////////
 // Client section
@@ -90,11 +90,11 @@ client.on('messageCreate', async message => {
     if (message.author.bot) return;
 
     // Do not use this in production, only for initial db population
-    /*     if (message.content === '!fetchmessages') {
-            await message.reply('Aloitetaan viestihistorian hakeminen...');
-            await handleFetchMessages(message);
-            await message.reply('Viestihistoria on käsitelty ja tallennettu MongoDB:hen.');
-        } */
+    if (message.content === '!fetchmessages') {
+        await message.reply('Aloitetaan viestihistorian hakeminen...');
+        await handleFetchMessages(message);
+        await message.reply('Viestihistoria on käsitelty ja tallennettu MongoDB:hen.');
+    }
 
     console.log(`Message received from user ${message.author.id}`);
     const guildId = message.guildId;
@@ -136,17 +136,32 @@ client.on('interactionCreate', async interaction => {
     const focusedOption = interaction.options.getFocused(true);
 
     if (focusedOption.name === 'username') {
+        // Check if the focused option value is empty
+        if (!focusedOption.value) {
+            // Respond with an empty array or a default set of choices
+            return interaction.respond([]);
+        }
+
         const guild = interaction.guild;
         const members = await guild.members.fetch();
+
+        // Map display names instead of usernames
         const choices = members.map(member => ({
-            display: member.displayName, // Show nickname (or username if no nickname)
-            value: member.user.username  // Use username for querying
+            name: member.displayName.length > 25 ? member.displayName.slice(0, 22) + "..." : member.displayName, // Truncate to 25 chars
+            value: member.user.username // Use username internally
         }));
 
-        const filtered = choices.filter(choice => choice.display.toLowerCase().startsWith(focusedOption.value.toLowerCase()));
-        await interaction.respond(
-            filtered.map(choice => ({ name: choice.display, value: choice.value }))
+        const filtered = choices.filter(choice =>
+            choice.name.toLowerCase().startsWith(focusedOption.value.toLowerCase())
         );
+
+        // Ensure choices are correctly formatted and limit to 25
+        const validChoices = filtered.slice(0, 25).map(choice => ({
+            name: choice.name.toString(),
+            value: choice.value.toString()
+        }));
+
+        await interaction.respond(validChoices);
     }
 });
 
