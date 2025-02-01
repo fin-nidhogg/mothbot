@@ -149,7 +149,13 @@ client.on('interactionCreate', async interaction => {
             choice.name.toLowerCase().startsWith(focusedOption.value.toLowerCase())
         );
 
-        await interaction.respond(filtered);
+        // Ensure choices are correctly formatted
+        const validChoices = filtered.map(choice => ({
+            name: choice.name.toString(),
+            value: choice.value.toString()
+        }));
+
+        await interaction.respond(validChoices);
     }
 });
 
