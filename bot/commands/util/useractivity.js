@@ -63,7 +63,7 @@ module.exports = {
             }).join('\n');
 
             // Send the message to the user as an ephemeral message
-            return interaction.reply({ content: `Heres some user activity stats for: ${username}\n\nTotal messages: ${totalMessageCount}\n${topChannelsMessage}`, flags: MessageFlags.Ephemeral });
+            return interaction.reply({ content: `\nHeres some user activity stats for user: **${username}**\n**Total messages: ${totalMessageCount}**\n${topChannelsMessage}`, flags: MessageFlags.Ephemeral });
         } catch (error) {
             if (error.response && error.response.status === 404) {
                 return interaction.reply({ content: 'No user activity found', flags: MessageFlags.Ephemeral });
