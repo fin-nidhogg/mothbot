@@ -15,7 +15,7 @@ require('dotenv').config({ path: envFile });
 Run only once for initial db population and comment out. 
 Also remember comment out the function call from line 92 */
 
-// const { handleFetchMessages } = require('./fetchmessages');
+const { handleFetchMessages } = require('./fetchmessages');
 
 //////////////////////////////////////
 // Client section
@@ -90,11 +90,11 @@ client.on('messageCreate', async message => {
     if (message.author.bot) return;
 
     // Do not use this in production, only for initial db population
-    /*     if (message.content === '!fetchmessages') {
+         if (message.content === '!fetchmessages') {
             await message.reply('Aloitetaan viestihistorian hakeminen...');
             await handleFetchMessages(message);
             await message.reply('Viestihistoria on käsitelty ja tallennettu MongoDB:hen.');
-        } */
+        } 
 
     console.log(`Message received from user ${message.author.id}`);
     const guildId = message.guildId;
