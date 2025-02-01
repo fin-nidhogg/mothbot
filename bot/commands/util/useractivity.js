@@ -30,6 +30,7 @@ module.exports = {
         try {
             const api_url = process.env.API_URL;
             const api_port = process.env.API_PORT;
+            console.log('Fetching from:', `${api_url}:${api_port}/top-channels/`);
             const response = await axios.get(`${api_url}:${api_port}/top-channels/`, {
                 params: {
                     username: username,
@@ -37,7 +38,13 @@ module.exports = {
                     end: end,
                 },
             });
-            const userActivity = response.data;
+
+            if (!response || !response.data) {
+                console.error('Invalid response from backend:', response);
+                return interaction.reply({ content: 'Internal server error', flags: MessageFlags.Ephemeral });
+            }
+
+            const { totalMessageCount, topChannels } = response.data;
 
             // Debuggaukseen, kommentoi ulos tuotannossa
             //console.log('User activity:', userActivity);
@@ -46,17 +53,17 @@ module.exports = {
             logCommand('useractivity', interaction.user.username, { username, start, end });
 
             // API Should handle empty responses and return a "No user activity found" message, but we'll check here just in case
-            if (userActivity.length === 0) {
+            if (topChannels.length === 0) {
                 return interaction.reply('No user activity found');
             }
 
             // Format response for nice display in Discord and send it to the user
-            const activityMessage = userActivity.map((channel, index) => {
+            const topChannelsMessage = topChannels.map((channel, index) => {
                 return `${index + 1}. Channel: ${channel.channelName}  |  Messages: ${channel.messageCount}`;
             }).join('\n');
 
             // Send the message to the user as an ephemeral message
-            return interaction.reply({ content: `User activity for ${username}:\n${activityMessage}`, flags: MessageFlags.Ephemeral });
+            return interaction.reply({ content: `Heres some user activity stats for: ${username}\n\nTotal messages: ${totalMessageCount}\n${topChannelsMessage}`, flags: MessageFlags.Ephemeral });
         } catch (error) {
             if (error.response && error.response.status === 404) {
                 return interaction.reply({ content: 'No user activity found', flags: MessageFlags.Ephemeral });

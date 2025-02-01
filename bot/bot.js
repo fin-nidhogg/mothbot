@@ -54,6 +54,7 @@ for (const folder of commandFolders) {
 // When the client is ready, run this code (only once).
 client.once(Events.ClientReady, readyClient => {
     console.log(`Ready! Logged in as ${readyClient.user.tag}`);
+    console.log(`Bot is using API: ${process.env.API_URL}:${process.env.API_PORT}`);
 });
 
 //////////////////////////////////////
