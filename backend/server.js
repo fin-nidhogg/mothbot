@@ -149,12 +149,22 @@ app.get('/top-channels/', async (req, res) => {
 
     // Query the database
     try {
+
+        // Aggregate total message count
+        const totalMessageCountResult = await UserStats.aggregate([
+            { $match: query },
+            { $group: { _id: null, totalMessageCount: { $sum: "$messageCount" } } },
+            { $project: { _id: 0, totalMessageCount: 1 } }
+        ]);
+
+        const totalMessageCount = totalMessageCountResult.length > 0 ? totalMessageCountResult[0].totalMessageCount : 0;
+
         // Aggregate user message counts by channel
         const userActivity = await UserStats.aggregate([
             { $match: query },
             { $group: { _id: { channelId: "$channelId", channelName: "$channelName" }, messageCount: { $sum: "$messageCount" } } },
             { $sort: { messageCount: -1 } },
-            { $limit: 5 },
+            { $limit: 10 },
             { $project: { _id: 0, channelName: "$_id.channelName", messageCount: 1 } }
         ]);
 
@@ -162,7 +172,11 @@ app.get('/top-channels/', async (req, res) => {
             return res.status(404).json({ message: 'No user activity found' });
         }
 
-        res.status(200).json(userActivity);
+        res.status(200).json({
+            totalMessageCount: totalMessageCount,
+            topChannels: userActivity
+        });
+
     } catch (err) {
         console.error('Error fetching user activity:', err);
         res.status(500).send('Internal server error');

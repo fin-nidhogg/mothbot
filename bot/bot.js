@@ -54,6 +54,7 @@ for (const folder of commandFolders) {
 // When the client is ready, run this code (only once).
 client.once(Events.ClientReady, readyClient => {
     console.log(`Ready! Logged in as ${readyClient.user.tag}`);
+    console.log(`Bot is using API: ${process.env.API_URL}:${process.env.API_PORT}`);
 });
 
 //////////////////////////////////////
@@ -88,7 +89,7 @@ client.on('messageCreate', async message => {
     // Prevent the bot from responding and counting its own messages
     if (message.author.bot) return;
 
-    // HITON VAARALLINEN KOMENTO, KÄYTÄ VAIN TESTAUKSEEN! KOMMENTOI ULOS ASAP!
+    // Do not use this in production, only for initial db population
     /*     if (message.content === '!fetchmessages') {
             await message.reply('Aloitetaan viestihistorian hakeminen...');
             await handleFetchMessages(message);
@@ -137,11 +138,14 @@ client.on('interactionCreate', async interaction => {
     if (focusedOption.name === 'username') {
         const guild = interaction.guild;
         const members = await guild.members.fetch();
-        const choices = members.map(member => member.user.username);
+        const choices = members.map(member => ({
+            display: member.displayName, // Show nickname (or username if no nickname)
+            value: member.user.username  // Use username for querying
+        }));
 
-        const filtered = choices.filter(choice => choice.toLowerCase().startsWith(focusedOption.value.toLowerCase()));
+        const filtered = choices.filter(choice => choice.display.toLowerCase().startsWith(focusedOption.value.toLowerCase()));
         await interaction.respond(
-            filtered.map(choice => ({ name: choice, value: choice }))
+            filtered.map(choice => ({ name: choice.display, value: choice.value }))
         );
     }
 });
