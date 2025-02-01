@@ -88,6 +88,7 @@ async function handleFetchMessages(message) {
             }
         });
     });
+    console.log('All messages have been processed and stored in MongoDB.');
 }
 
 module.exports = { handleFetchMessages }
