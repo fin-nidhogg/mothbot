@@ -137,11 +137,14 @@ client.on('interactionCreate', async interaction => {
     if (focusedOption.name === 'username') {
         const guild = interaction.guild;
         const members = await guild.members.fetch();
-        const choices = members.map(member => member.user.username);
+        const choices = members.map(member => ({
+            display: member.displayName, // Show nickname (or username if no nickname)
+            value: member.user.username  // Use username for querying
+        }));
 
-        const filtered = choices.filter(choice => choice.toLowerCase().startsWith(focusedOption.value.toLowerCase()));
+        const filtered = choices.filter(choice => choice.display.toLowerCase().startsWith(focusedOption.value.toLowerCase()));
         await interaction.respond(
-            filtered.map(choice => ({ name: choice, value: choice }))
+            filtered.map(choice => ({ name: choice.display, value: choice.value }))
         );
     }
 });
