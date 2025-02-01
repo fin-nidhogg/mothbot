@@ -138,15 +138,18 @@ client.on('interactionCreate', async interaction => {
     if (focusedOption.name === 'username') {
         const guild = interaction.guild;
         const members = await guild.members.fetch();
+
+        // Map display names instead of usernames
         const choices = members.map(member => ({
-            display: member.displayName, // Show nickname (or username if no nickname)
-            value: member.user.username  // Use username for querying
+            name: member.displayName.length > 25 ? member.displayName.slice(0, 22) + "..." : member.displayName, // Truncate to 25 chars
+            value: member.user.username // Use username internally
         }));
 
-        const filtered = choices.filter(choice => choice.display.toLowerCase().startsWith(focusedOption.value.toLowerCase()));
-        await interaction.respond(
-            filtered.map(choice => ({ name: choice.display, value: choice.value }))
+        const filtered = choices.filter(choice =>
+            choice.name.toLowerCase().startsWith(focusedOption.value.toLowerCase())
         );
+
+        await interaction.respond(filtered);
     }
 });
 
