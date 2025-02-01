@@ -90,11 +90,11 @@ client.on('messageCreate', async message => {
     if (message.author.bot) return;
 
     // Do not use this in production, only for initial db population
-         if (message.content === '!fetchmessages') {
-            await message.reply('Aloitetaan viestihistorian hakeminen...');
-            await handleFetchMessages(message);
-            await message.reply('Viestihistoria on käsitelty ja tallennettu MongoDB:hen.');
-        } 
+    if (message.content === '!fetchmessages') {
+        await message.reply('Aloitetaan viestihistorian hakeminen...');
+        await handleFetchMessages(message);
+        await message.reply('Viestihistoria on käsitelty ja tallennettu MongoDB:hen.');
+    }
 
     console.log(`Message received from user ${message.author.id}`);
     const guildId = message.guildId;
@@ -136,6 +136,12 @@ client.on('interactionCreate', async interaction => {
     const focusedOption = interaction.options.getFocused(true);
 
     if (focusedOption.name === 'username') {
+        // Check if the focused option value is empty
+        if (!focusedOption.value) {
+            // Respond with an empty array or a default set of choices
+            return interaction.respond([]);
+        }
+
         const guild = interaction.guild;
         const members = await guild.members.fetch();
 
@@ -149,8 +155,8 @@ client.on('interactionCreate', async interaction => {
             choice.name.toLowerCase().startsWith(focusedOption.value.toLowerCase())
         );
 
-        // Ensure choices are correctly formatted
-        const validChoices = filtered.map(choice => ({
+        // Ensure choices are correctly formatted and limit to 25
+        const validChoices = filtered.slice(0, 25).map(choice => ({
             name: choice.name.toString(),
             value: choice.value.toString()
         }));
