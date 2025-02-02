@@ -27,7 +27,6 @@ async function handleFetchMessages(message) {
                 try {
                     let messages = [];
                     let lastMessageId = null;
-
                     // Fetch message history
                     do {
                         const fetchedMessages = await channel.messages.fetch({

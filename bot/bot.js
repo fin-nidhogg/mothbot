@@ -15,7 +15,7 @@ require('dotenv').config({ path: envFile });
 Run only once for initial db population and comment out. 
 Also remember comment out the function call from line 92 */
 
-const { handleFetchMessages } = require('./fetchmessages');
+// const { handleFetchMessages } = require('./fetchmessages');
 
 //////////////////////////////////////
 // Client section
@@ -61,7 +61,8 @@ client.once(Events.ClientReady, readyClient => {
 // General functions section ie. logger
 //////////////////////////////////////
 
-// Function to send a POST request to the backend
+// Function to create a new messagelog entry in the database
+// This is invoked every time a message is received via the messageCreate event
 async function sendPostRequest(guildId, channelId, channelName, userId, username, nickname) {
     const api_url = process.env.API_URL;
     const api_port = process.env.API_PORT;
@@ -90,11 +91,11 @@ client.on('messageCreate', async message => {
     if (message.author.bot) return;
 
     // Do not use this in production, only for initial db population
-    if (message.content === '!fetchmessages') {
-        await message.reply('Aloitetaan viestihistorian hakeminen...');
+    /* if (message.content === '!fetchmessages') {
+        await message.reply('Reading whole message history...');
         await handleFetchMessages(message);
-        await message.reply('Viestihistoria on käsitelty ja tallennettu MongoDB:hen.');
-    }
+        await message.reply('Message history reguested, starting to store messages...\nThis may take a while depending on the amount of messages.');
+    } */
 
     console.log(`Message received from user ${message.author.id}`);
     const guildId = message.guildId;
