@@ -28,7 +28,7 @@ const client = new Client({
         GatewayIntentBits.Guilds,
         GatewayIntentBits.GuildMessages,
         GatewayIntentBits.GuildMembers,
-        GatewayIntentBits.MessageContent
+        GatewayIntentBits.MessageContent,
     ]
 });
 
@@ -94,9 +94,9 @@ async function sendPostRequest(guildId, channelId, channelName, userId, username
 
 // Listen and log messages to mongodb
 client.on('messageCreate', async message => {
+    console.log(`Received message: ${message.content} from ${message.author.tag}`);
     // Prevent the bot from responding and counting its own messages
     if (message.author.bot) return;
-
 
     // Do not use this in production. This is  only for initial db population
     /* if (message.content === '!fetchmessages') {
@@ -105,16 +105,6 @@ client.on('messageCreate', async message => {
         await message.reply('Message history reguested, starting to store messages...\nThis may take a while depending on the amount of messages.');
     } */
 
-    // Check if the message was sent in a guild or via DM
-    if (message.guild === null) {
-        console.log(`DM Received from ${message.author.tag}: ${message.content}`);
-        logCommand('DM from', message.author.nickname, { message: message.content });
-
-        // Voit esimerkiksi vastata viestiin automaattisesti
-        message.reply(`Ah, a mysterious DM appears...\nUnfortunately, I do not possess the means to converse here.\nAs the wise say, 'The stars only align when we gather together.'\nThis message, however, has been recorded in the logs, as a reminder from the past to the future.\n\nBeware, for all messages may one day reveal their secrets.`);
-    }
-
-    console.log(`Message received from user ${message.author.id}`);
     const guildId = message.guildId;
     const channelId = message.channelId;
     const channelName = message.channel.name;
