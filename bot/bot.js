@@ -104,7 +104,7 @@ client.on('messageCreate', async message => {
         logCommand('DM from', authorName, { message: message.content });
 
         try {
-            await message.reply(`Ah, a mysterious DM appears...\nUnfortunately, I do not possess the means to converse here.\nAs the wise say, 'The stars only align when we gather together.'\n\nThis message, however, has been recorded in the logs, as a reminder from the past to the future.\nBeware, for all messages may one day reveal their secrets.`);
+            await message.reply(`Ah, a mysterious DM appears...\nUnfortunately, I do not possess the means to converse here.\nAs the wise say, *'The stars only align when we gather together.'*\n\nThis message, however, has been recorded in the logs, as a reminder from the past to the future.\nBeware, for all messages may one day reveal their secrets.`);
         } catch (error) {
             console.error('Error sending DM reply:', error);
         }
