@@ -6,12 +6,13 @@ const fs = require('node:fs');
 const path = require('node:path');
 const { Client, Collection, Events, GatewayIntentBits, MessageFlags } = require('discord.js');
 const axios = require('axios');
+const { logCommand } = require('./logger');
 
 // Load environment variables depending on the environment
 const envFile = process.env.NODE_ENV === 'production' ? '.env.production' : '.env.development';
 require('dotenv').config({ path: envFile });
 
-/* Really ugly way to fetch initial messages, should be refactored. 
+/* Really ugly way to fetch initial messages.. should be refactored in future. You know what i mean... 
 Run only once for initial db population and comment out. 
 Also remember comment out the function call from line 92 */
 
@@ -31,7 +32,9 @@ const client = new Client({
     ]
 });
 
+////////////////////////////////////////////////////////////////////
 // Dynamically read all command files from the commands directory
+////////////////////////////////////////////////////////////////////
 
 client.commands = new Collection();
 const folderPath = path.join(__dirname, 'commands');
@@ -51,18 +54,22 @@ for (const folder of commandFolders) {
     }
 }
 
+////////////////////////////////////////////////////////////////////
 // When the client is ready, run this code (only once).
+////////////////////////////////////////////////////////////////////
+
 client.once(Events.ClientReady, readyClient => {
     console.log(`Ready! Logged in as ${readyClient.user.tag}`);
     console.log(`Bot is using API: ${process.env.API_URL}:${process.env.API_PORT}`);
 });
 
-//////////////////////////////////////
+////////////////////////////////////////////////////////////////////
 // General functions section ie. logger
-//////////////////////////////////////
+////////////////////////////////////////////////////////////////////
 
 // Function to create a new messagelog entry in the database
 // This is invoked every time a message is received via the messageCreate event
+
 async function sendPostRequest(guildId, channelId, channelName, userId, username, nickname) {
     const api_url = process.env.API_URL;
     const api_port = process.env.API_PORT;
@@ -81,21 +88,31 @@ async function sendPostRequest(guildId, channelId, channelName, userId, username
     }
 }
 
-//////////////////////////////////////
+////////////////////////////////////////////////////////////////////
 // Event listeners section
-//////////////////////////////////////
+////////////////////////////////////////////////////////////////////
 
 // Listen and log messages to mongodb
 client.on('messageCreate', async message => {
     // Prevent the bot from responding and counting its own messages
     if (message.author.bot) return;
 
-    // Do not use this in production, only for initial db population
+
+    // Do not use this in production. This is  only for initial db population
     /* if (message.content === '!fetchmessages') {
         await message.reply('Reading whole message history...');
         await handleFetchMessages(message);
         await message.reply('Message history reguested, starting to store messages...\nThis may take a while depending on the amount of messages.');
     } */
+
+    // Check if the message was sent in a guild or via DM
+    if (message.guild === null) {
+        console.log(`DM Received from ${message.author.tag}: ${message.content}`);
+        logCommand('DM from', message.author.nickname, { message: message.content });
+
+        // Voit esimerkiksi vastata viestiin automaattisesti
+        message.reply(`Ah, a mysterious DM appears...\nUnfortunately, I do not possess the means to converse here.\nAs the wise say, 'The stars only align when we gather together.'\nThis message, however, has been recorded in the logs, as a reminder from the past to the future.\n\nBeware, for all messages may one day reveal their secrets.`);
+    }
 
     console.log(`Message received from user ${message.author.id}`);
     const guildId = message.guildId;
@@ -131,7 +148,7 @@ client.on(Events.InteractionCreate, async interaction => {
 });
 
 // event listener for autocompleting usernames
-client.on('interactionCreate', async interaction => {
+client.on(Events.InteractionCreate, async interaction => {
     if (!interaction.isAutocomplete()) return;
 
     const focusedOption = interaction.options.getFocused(true);
