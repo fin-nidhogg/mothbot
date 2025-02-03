@@ -4,7 +4,7 @@
 
 const fs = require('node:fs');
 const path = require('node:path');
-const { Client, Collection, Events, GatewayIntentBits, MessageFlags } = require('discord.js');
+const { Client, Collection, Events, GatewayIntentBits, MessageFlags, Partials } = require('discord.js');
 const axios = require('axios');
 const { logCommand } = require('./logger');
 
@@ -29,7 +29,9 @@ const client = new Client({
         GatewayIntentBits.GuildMessages,
         GatewayIntentBits.GuildMembers,
         GatewayIntentBits.MessageContent,
-    ]
+        GatewayIntentBits.DirectMessages,
+    ],
+    partials: [Partials.Channel],
 });
 
 ////////////////////////////////////////////////////////////////////
@@ -95,6 +97,18 @@ async function sendPostRequest(guildId, channelId, channelName, userId, username
 // Listen and log messages to mongodb
 client.on('messageCreate', async message => {
     console.log(`Received message: ${message.content} from ${message.author.tag}`);
+
+    if (!message.guild && !message.author.bot) {
+        const authorName = message.author.nickname || message.author.username;
+        console.log(`DM Received from ${message.author.tag}: ${message.content}`);
+        logCommand('DM from', authorName, { message: message.content });
+
+        try {
+            await message.reply(`Ah, a mysterious DM appears...\nUnfortunately, I do not possess the means to converse here.\nAs the wise say, 'The stars only align when we gather together.'\n\nThis message, however, has been recorded in the logs, as a reminder from the past to the future.\nBeware, for all messages may one day reveal their secrets.`);
+        } catch (error) {
+            console.error('Error sending DM reply:', error);
+        }
+    }
     // Prevent the bot from responding and counting its own messages
     if (message.author.bot) return;
 
