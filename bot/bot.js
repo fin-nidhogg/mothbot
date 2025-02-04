@@ -72,6 +72,7 @@ client.once(Events.ClientReady, readyClient => {
 // Function to create a new messagelog entry in the database
 // This is invoked every time a message is received via the messageCreate event
 
+// Function to send a POST request to the bots own db API
 async function sendPostRequest(guildId, channelId, channelName, userId, username, nickname) {
     const api_url = process.env.API_URL;
     const api_port = process.env.API_PORT;
@@ -90,6 +91,51 @@ async function sendPostRequest(guildId, channelId, channelName, userId, username
     }
 }
 
+// Function to make AI Horde requests
+async function generateWithHorde(prompt) {
+    try {
+        // Initial request to generate text
+        const initialResponse = await axios.post("https://stablehorde.net/api/v2/generate/text/async", {
+            prompt: prompt,
+            params: {
+                max_context_length: 100,
+                max_length: 60,
+                temperature: 0.9
+            }
+        }, {
+            headers: { "apikey": process.env.HORDE_API_KEY }
+        });
+
+        // For debugging
+        console.log('AI Horde initial response:', initialResponse.data);
+
+        const requestId = initialResponse.data.id;
+
+        // Polling for the result
+        let resultResponse;
+        while (true) {
+            resultResponse = await axios.get(`https://stablehorde.net/api/v2/generate/text/status/${requestId}`, {
+                headers: { "apikey": process.env.HORDE_API_KEY }
+            });
+
+            // For debugging
+            console.log('AI Horde polling response:', resultResponse.data);
+
+            if (resultResponse.data.generations && resultResponse.data.generations.length > 0) {
+                break;
+            }
+
+            // Wait for a short period before polling again
+            await new Promise(resolve => setTimeout(resolve, 2000));
+        }
+
+        return resultResponse.data.generations[0].text || `Ah, a mysterious DM appears...\nUnfortunately, I do not possess the means to converse here.\nAs the wise say, *'The stars only align when we gather together.'*\n\nThis message, however, has been recorded in the logs, as a reminder from the past to the future.\nBeware, for all messages may one day reveal their secrets.`;
+    } catch (error) {
+        console.error("Error in AI Horde request:", error);
+        return "Something went critically wrong 🤔";
+    }
+}
+
 ////////////////////////////////////////////////////////////////////
 // Event listeners section
 ////////////////////////////////////////////////////////////////////
@@ -98,35 +144,44 @@ async function sendPostRequest(guildId, channelId, channelName, userId, username
 client.on('messageCreate', async message => {
     console.log(`Received message: ${message.content} from ${message.author.tag}`);
 
+    // if the message is a DM and Horde is enabled, log it and reply with a generated message, else reply with a default message
     if (!message.guild && !message.author.bot) {
         const authorName = message.author.nickname || message.author.username;
+        const replyMessage = await generateWithHorde("Respond to this with a slight humor, yet maintaining an mysterious feeling: " + message.content);
         console.log(`DM Received from ${message.author.tag}: ${message.content}`);
         logCommand('DM from', authorName, { message: message.content });
 
-        try {
-            await message.reply(`Ah, a mysterious DM appears...\nUnfortunately, I do not possess the means to converse here.\nAs the wise say, *'The stars only align when we gather together.'*\n\nThis message, however, has been recorded in the logs, as a reminder from the past to the future.\nBeware, for all messages may one day reveal their secrets.`);
-        } catch (error) {
-            console.error('Error sending DM reply:', error);
+        // Check if horde is enabled in the environment variabless and reply accordingly
+        if (process.env.HORDE_ENABLED === 'true') {
+            message.reply(replyMessage);
+        } else {
+            try {
+                await message.reply(`Ah, a mysterious DM appears...\nUnfortunately, I do not possess the means to converse here.\nAs the wise say, *'The stars only align when we gather together.'*\n\nThis message, however, has been recorded in the logs, as a reminder from the past to the future.\nBeware, for all messages may one day reveal their secrets.`);
+            } catch (error) {
+                console.error('Error sending DM reply:', error);
+            }
         }
+
+    } else {
+        // Prevent the bot from responding and counting its own messages
+        if (message.author.bot) return;
+
+        // Do not use this in production. This is  only for initial db population
+        /* if (message.content === '!fetchmessages') {
+            await message.reply('Reading whole message history...');
+            await handleFetchMessages(message);
+            await message.reply('Message history reguested, starting to store messages...\nThis may take a while depending on the amount of messages.');
+        } */
+
+        // Extract fields and Log the message to the database
+        const guildId = message.guildId;
+        const channelId = message.channelId;
+        const channelName = message.channel.name;
+        const userId = message.author.id;
+        const username = message.author.username;
+        const nickname = message.member ? message.member.displayName : null;
+        sendPostRequest(guildId, channelId, channelName, userId, username, nickname);
     }
-    // Prevent the bot from responding and counting its own messages
-    if (message.author.bot) return;
-
-    // Do not use this in production. This is  only for initial db population
-    /* if (message.content === '!fetchmessages') {
-        await message.reply('Reading whole message history...');
-        await handleFetchMessages(message);
-        await message.reply('Message history reguested, starting to store messages...\nThis may take a while depending on the amount of messages.');
-    } */
-
-    const guildId = message.guildId;
-    const channelId = message.channelId;
-    const channelName = message.channel.name;
-    const userId = message.author.id;
-    const username = message.author.username;
-    const nickname = message.member ? message.member.displayName : null;
-
-    sendPostRequest(guildId, channelId, channelName, userId, username, nickname);
 });
 
 // Listen interactions and run the appropriate command
