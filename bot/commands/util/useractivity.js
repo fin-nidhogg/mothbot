@@ -1,4 +1,4 @@
-const { SlashCommandBuilder, MessageFlags, EntryPointCommandHandlerType } = require('discord.js');
+const { SlashCommandBuilder, MessageFlags } = require('discord.js');
 const axios = require('axios');
 const { logCommand } = require('../../logger');
 const config = require('../../config');
@@ -22,6 +22,7 @@ module.exports = {
                 .setRequired(false)),
 
     async execute(interaction) {
+
         const username = interaction.options.getString('username');
         const start = interaction.options.getString('start');
         const end = interaction.options.getString('end');
@@ -52,7 +53,7 @@ module.exports = {
 
             // API Should handle empty responses and return a "No user activity found" message, but we'll check here just in case
             if (topChannels.length === 0) {
-                return interaction.reply('No user activity found');
+                return interaction.reply({ content: 'No user activity found', flags: MessageFlags.Ephemeral });
             }
 
             // Format response for nice display in Discord and send it to the user

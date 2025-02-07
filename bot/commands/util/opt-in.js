@@ -1,4 +1,4 @@
-const { SlashCommandBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle } = require('discord.js');
+const { SlashCommandBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle, MessageFlags } = require('discord.js');
 
 module.exports = {
     data: new SlashCommandBuilder()
@@ -31,7 +31,7 @@ module.exports = {
   - **Withdraw consent & delete your data:** Use \`/opt-out\` to remove your stored data.  
 \nDo you consent to data collection?`,
             components: [row],
-            ephemeral: true // Only the user sees this message
+            flags: MessageFlags.Ephemeral // Only the user sees this message
         });
     }
 };

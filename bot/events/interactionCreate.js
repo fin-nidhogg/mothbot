@@ -1,4 +1,6 @@
 const { MessageFlags } = require('discord.js');
+const updateUserConsent = require('../utils/updateUserConsent');
+const getUserConsent = require('../utils/getUserConsent');
 
 module.exports = {
     name: 'interactionCreate',
@@ -11,7 +13,13 @@ module.exports = {
                 return;
             }
 
+
             try {
+                const consent = await getUserConsent(interaction.user.id);
+                if (interaction.commandName === 'useractivity' && !consent) {
+                    await interaction.reply({ content: 'You have not given consent for data collection. To respect your privacy, the bot does not store or access your activity data without your consent. You can give your consent by using the \`/opt-in\` command.', flags: MessageFlags.Ephemeral });
+                    return;
+                }
                 await command.execute(interaction);
             } catch (error) {
                 console.error(error);
@@ -26,34 +34,36 @@ module.exports = {
         // Handle button interactions
         else if (interaction.isButton()) {
             if (interaction.customId === 'optin_accept') {
-                await interaction.reply({ content: '✅ **You have opted in to data collection.** You can withdraw your consent at any time by using /opt-out.', ephemeral: true });
+                await interaction.reply({ content: '✅ **You have opted in to data collection.** You can withdraw your consent at any time by using /opt-out.', flags: MessageFlags.Ephemeral });
 
-                // Store user consent in a database or memory (implement your own logic here)
+                // Store user consent in a database.
+                updateUserConsent(interaction.user.id, true);
                 console.log(`User ${interaction.user.tag} has opted in to data collection.`);
 
             } else if (interaction.customId === 'optin_reject') {
-                await interaction.reply({ content: '❌ You have declined data collection.', ephemeral: true });
+                await interaction.reply({ content: '❌ You have declined data collection.', flags: MessageFlags.Ephemeral });
 
-                // Implement logic to ensure data isn't stored for this user
+                // No concent, no data, so no need to store anything
                 console.log(`User ${interaction.user.tag} has declined data collection.`);
 
             } else if (interaction.customId === 'optout_confirm') {
                 // Logic to remove the user from the data collection (opt-out)
                 // Add any necessary code to delete the user's data or update the system.
-
+                updateUserConsent(interaction.user.id, false);
                 console.log(`User ${interaction.user.tag} has opted out of data collection.`);
 
                 await interaction.reply({
-                    content: `You have successfully opted out of data collection. Your data will be deleted.`,
-                    ephemeral: true
+                    content: `You have successfully opted out of data collection.Your data will be deleted shortly.`,
+                    flags: MessageFlags.Ephemeral
                 });
             } else if (interaction.customId === 'optout_cancel') {
-                // Cancel the opt-out action
-                console.log(`User ${interaction.user.tag} has cancelled the opt-out action.`);
+
+                // Cancel the opt-out action no action needed
+                console.log(`User ${interaction.user.tag} has cancelled the opt - out action.`);
 
                 await interaction.reply({
-                    content: `Opt-out cancelled. Your data will continue to be collected.`,
-                    ephemeral: true
+                    content: `Opt - out cancelled.Your data will continue to be collected.`,
+                    flags: MessageFlags.Ephemeral
                 });
             }
         }

@@ -1,7 +1,7 @@
 const axios = require('axios');
 const config = require('../config');
 
-async function getConsent(userId) {
+async function getUserConsent(userId) {
     try {
         const response = await axios.get(`${config.apiUrl}:${config.apiPort}/consent/${userId}`);
         if (response.status !== 200) {
@@ -15,4 +15,4 @@ async function getConsent(userId) {
     }
 }
 
-module.exports = getConsent;
+module.exports = getUserConsent;

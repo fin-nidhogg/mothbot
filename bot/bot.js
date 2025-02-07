@@ -5,9 +5,6 @@
 const fs = require('node:fs');
 const path = require('node:path');
 const { Client, Collection, Events, GatewayIntentBits, Partials } = require('discord.js');
-// const { logCommand } = require('./logger');
-// const sendPostRequest = require('./utils/sendPostRequest');
-// const generateWithHorde = require('./utils/generateWithHorde');
 const config = require('./config');
 
 ////////////////////////////////////////////////////////////////////
