@@ -8,7 +8,7 @@
     "start:prod-win": "cross-env NODE_ENV=production node bot.js",
     "start:dev": "NODE_ENV=development node bot.js",
     "start:prod": "NODE_ENV=production node bot.js",
-    "start:dev-register": "NODE_ENV=development node register-commands.js",
+    "start:dev-register": "cross-env NODE_ENV=development node register-commands.js",
     "start:prod-register": "NODE_ENV=production node register-commands.js"
   },
   "keywords": [

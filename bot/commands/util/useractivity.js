@@ -1,7 +1,7 @@
 const { SlashCommandBuilder, MessageFlags, EntryPointCommandHandlerType } = require('discord.js');
 const axios = require('axios');
 const { logCommand } = require('../../logger');
-require('dotenv').config()
+const config = require('../../config');
 
 module.exports = {
     data: new SlashCommandBuilder()
@@ -28,10 +28,8 @@ module.exports = {
 
         // Try to fetch user activity from the backend
         try {
-            const api_url = process.env.API_URL;
-            const api_port = process.env.API_PORT;
-            console.log('Fetching from:', `${api_url}:${api_port}/top-channels/`);
-            const response = await axios.get(`${api_url}:${api_port}/top-channels/`, {
+            console.log('Fetching from:', `${config.apiUrl}:${config.apiPort}/top-channels/`);
+            const response = await axios.get(`${config.apiUrl}:${config.apiPort}/top-channels/`, {
                 params: {
                     username: username,
                     start: start,
