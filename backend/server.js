@@ -1,6 +1,8 @@
 const express = require('express');
 const moment = require('moment');
 const UserStats = require('./models/user_stats');
+const UserConsent = require('./models/UserConsents');
+
 const app = express();
 const helmet = require('helmet');
 
@@ -180,6 +182,41 @@ app.get('/top-channels/', async (req, res) => {
     } catch (err) {
         console.error('Error fetching user activity:', err);
         res.status(500).send('Internal server error');
+    }
+});
+
+// POST /consent - create or update user consent document
+app.post('/consent', async (req, res) => {
+    const { userId, consent } = req.body;
+
+    try {
+        const updatedConsent = await UserConsent.findOneAndUpdate(
+            { userId },
+            { consent },
+            { new: true, upsert: true } // Luo uusi asiakirja, jos sitä ei ole
+        );
+        res.json({ message: `Consent information updated for user ${userId}`, consent: updatedConsent.consent });
+    } catch (error) {
+        res.status(500).json({ error: 'Failed to update consent information.' });
+    }
+});
+
+
+// GET /consent/:userId - Fetch user consent status
+app.get('/consent/:userId', async (req, res) => {
+    const { userId } = req.params;
+
+    try {
+        const userConsent = await UserConsent.findOne({ userId });
+        if (userConsent) {
+            res.json({
+                consent: userConsent.consent
+            });
+        } else {
+            res.json({ consent: false });
+        }
+    } catch (error) {
+        res.status(500).json({ error: 'Failed to fetch user consent information' });
     }
 });
 

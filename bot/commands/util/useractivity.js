@@ -1,7 +1,7 @@
-const { SlashCommandBuilder, MessageFlags, EntryPointCommandHandlerType } = require('discord.js');
+const { SlashCommandBuilder, MessageFlags } = require('discord.js');
 const axios = require('axios');
 const { logCommand } = require('../../logger');
-require('dotenv').config()
+const config = require('../../config');
 
 module.exports = {
     data: new SlashCommandBuilder()
@@ -22,16 +22,15 @@ module.exports = {
                 .setRequired(false)),
 
     async execute(interaction) {
+
         const username = interaction.options.getString('username');
         const start = interaction.options.getString('start');
         const end = interaction.options.getString('end');
 
         // Try to fetch user activity from the backend
         try {
-            const api_url = process.env.API_URL;
-            const api_port = process.env.API_PORT;
-            console.log('Fetching from:', `${api_url}:${api_port}/top-channels/`);
-            const response = await axios.get(`${api_url}:${api_port}/top-channels/`, {
+            console.log('Fetching from:', `${config.apiUrl}:${config.apiPort}/top-channels/`);
+            const response = await axios.get(`${config.apiUrl}:${config.apiPort}/top-channels/`, {
                 params: {
                     username: username,
                     start: start,
@@ -54,7 +53,7 @@ module.exports = {
 
             // API Should handle empty responses and return a "No user activity found" message, but we'll check here just in case
             if (topChannels.length === 0) {
-                return interaction.reply('No user activity found');
+                return interaction.reply({ content: 'No user activity found', flags: MessageFlags.Ephemeral });
             }
 
             // Format response for nice display in Discord and send it to the user

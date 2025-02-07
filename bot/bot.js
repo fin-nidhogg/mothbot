@@ -1,37 +1,30 @@
-//////////////////////////////////////
+////////////////////////////////////////////////////////////////////
 // Imports section
-//////////////////////////////////////
+////////////////////////////////////////////////////////////////////
 
 const fs = require('node:fs');
 const path = require('node:path');
-const { Client, Collection, Events, GatewayIntentBits, MessageFlags } = require('discord.js');
-const axios = require('axios');
+const { Client, Collection, Events, GatewayIntentBits, Partials } = require('discord.js');
+const config = require('./config');
 
-// Load environment variables depending on the environment
-const envFile = process.env.NODE_ENV === 'production' ? '.env.production' : '.env.development';
-require('dotenv').config({ path: envFile });
-
-/* Really ugly way to fetch initial messages, should be refactored. 
-Run only once for initial db population and comment out. 
-Also remember comment out the function call from line 92 */
-
-// const { handleFetchMessages } = require('./fetchmessages');
-
-//////////////////////////////////////
+////////////////////////////////////////////////////////////////////
 // Client section
-//////////////////////////////////////
-
+////////////////////////////////////////////////////////////////////
 // Create a new client instance
 const client = new Client({
     intents: [
         GatewayIntentBits.Guilds,
         GatewayIntentBits.GuildMessages,
         GatewayIntentBits.GuildMembers,
-        GatewayIntentBits.MessageContent
-    ]
+        GatewayIntentBits.MessageContent,
+        GatewayIntentBits.DirectMessages,
+    ],
+    partials: [Partials.Channel],
 });
 
+////////////////////////////////////////////////////////////////////
 // Dynamically read all command files from the commands directory
+////////////////////////////////////////////////////////////////////
 
 client.commands = new Collection();
 const folderPath = path.join(__dirname, 'commands');
@@ -51,120 +44,25 @@ for (const folder of commandFolders) {
     }
 }
 
-// When the client is ready, run this code (only once).
-client.once(Events.ClientReady, readyClient => {
-    console.log(`Ready! Logged in as ${readyClient.user.tag}`);
-    console.log(`Bot is using API: ${process.env.API_URL}:${process.env.API_PORT}`);
-});
+////////////////////////////////////////////////////////////////////
+// Dynamically read all event files from the events directory
+////////////////////////////////////////////////////////////////////
 
-//////////////////////////////////////
-// General functions section ie. logger
-//////////////////////////////////////
+const eventsPath = path.join(__dirname, 'events');
+const eventFiles = fs.readdirSync(eventsPath).filter(file => file.endsWith('.js'));
 
-// Function to create a new messagelog entry in the database
-// This is invoked every time a message is received via the messageCreate event
-async function sendPostRequest(guildId, channelId, channelName, userId, username, nickname) {
-    const api_url = process.env.API_URL;
-    const api_port = process.env.API_PORT;
-    try {
-        const response = await axios.post(`${api_url}:${api_port}/add`, {
-            guildId,
-            channelId,
-            channelName,
-            userId,
-            username,
-            nickname,
-        });
-        console.log('Data sent successfully:', response.status + ' ' + response.statusText);
-    } catch (error) {
-        console.error('Error sending data:', error);
+for (const file of eventFiles) {
+    const filePath = path.join(eventsPath, file);
+    const event = require(filePath);
+    if (event.once) {
+        client.once(event.name, (...args) => event.execute(...args));
+    } else {
+        client.on(event.name, (...args) => event.execute(...args));
     }
 }
 
-//////////////////////////////////////
-// Event listeners section
-//////////////////////////////////////
-
-// Listen and log messages to mongodb
-client.on('messageCreate', async message => {
-    // Prevent the bot from responding and counting its own messages
-    if (message.author.bot) return;
-
-    // Do not use this in production, only for initial db population
-    /* if (message.content === '!fetchmessages') {
-        await message.reply('Reading whole message history...');
-        await handleFetchMessages(message);
-        await message.reply('Message history reguested, starting to store messages...\nThis may take a while depending on the amount of messages.');
-    } */
-
-    console.log(`Message received from user ${message.author.id}`);
-    const guildId = message.guildId;
-    const channelId = message.channelId;
-    const channelName = message.channel.name;
-    const userId = message.author.id;
-    const username = message.author.username;
-    const nickname = message.member ? message.member.displayName : null;
-
-    sendPostRequest(guildId, channelId, channelName, userId, username, nickname);
-});
-
-// Listen interactions and run the appropriate command
-client.on(Events.InteractionCreate, async interaction => {
-    if (!interaction.isChatInputCommand()) return;
-    const command = interaction.client.commands.get(interaction.commandName);
-
-    if (!command) {
-        console.error(`No command matching ${interaction.commandName} was found.`);
-        return;
-    }
-
-    try {
-        await command.execute(interaction);
-    } catch (error) {
-        console.error(error);
-        if (interaction.replied || interaction.deferred) {
-            await interaction.followUp({ content: 'There was an error while executing this command!', flags: MessageFlags.Ephemeral });
-        } else {
-            await interaction.reply({ content: 'There was an error while executing this command!', flags: MessageFlags.Ephemeral });
-        }
-    }
-});
-
-// event listener for autocompleting usernames
-client.on('interactionCreate', async interaction => {
-    if (!interaction.isAutocomplete()) return;
-
-    const focusedOption = interaction.options.getFocused(true);
-
-    if (focusedOption.name === 'username') {
-        // Check if the focused option value is empty
-        if (!focusedOption.value) {
-            // Respond with an empty array or a default set of choices
-            return interaction.respond([]);
-        }
-
-        const guild = interaction.guild;
-        const members = await guild.members.fetch();
-
-        // Map display names instead of usernames
-        const choices = members.map(member => ({
-            name: member.displayName.length > 25 ? member.displayName.slice(0, 22) + "..." : member.displayName, // Truncate to 25 chars
-            value: member.user.username // Use username internally
-        }));
-
-        const filtered = choices.filter(choice =>
-            choice.name.toLowerCase().startsWith(focusedOption.value.toLowerCase())
-        );
-
-        // Ensure choices are correctly formatted and limit to 25
-        const validChoices = filtered.slice(0, 25).map(choice => ({
-            name: choice.name.toString(),
-            value: choice.value.toString()
-        }));
-
-        await interaction.respond(validChoices);
-    }
-});
-
+////////////////////////////////////////////////////////////////////
 // Log in to Discord with client's token
-client.login(process.env.APP_TOKEN); 
+////////////////////////////////////////////////////////////////////
+
+client.login(config.appToken);

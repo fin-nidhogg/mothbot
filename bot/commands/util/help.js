@@ -1,8 +1,6 @@
 const { SlashCommandBuilder, Message, MessageFlags } = require('discord.js');
 const { logCommand } = require('../../logger');
-
-const helpchannel = process.env.HELP_CHANNEL_ID;
-const questionschannel = process.env.QUESTIONS_CHANNEL_ID;
+const config = require('../../config');
 
 module.exports = {
     data: new SlashCommandBuilder()
@@ -12,7 +10,7 @@ module.exports = {
         logCommand('help', interaction.user.username);
         const botname = interaction.client.user.username;
         const message =
-            `Hello! I am the ${botname}! As your humble servant, I am here to assist you with all your temple needs!
+            `Hello! I am the ${config.botname}! As your humble servant, I am here to assist you with all your temple needs!
     
     Heres some links to start with:
     
@@ -23,7 +21,7 @@ module.exports = {
     :butterfly:     **[Reality shaping](https://templeofchrysalis.com/reality-shaping/)**
     :butterfly:     **[Chrysoteria](https://templeofchrysalis.com/chrysoteria/)**
     
-    Don't forget to check out the <#${helpchannel}> and <#${questionschannel}> channels for more information!`;
+    Don't forget to check out the <#${config.helpchannelId}> and <#${config.questionchannelId}> channels for more information!`;
 
         await interaction.reply({ content: message, flags: MessageFlags.Ephemeral });
     }
