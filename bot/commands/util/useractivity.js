@@ -2,6 +2,7 @@ const { SlashCommandBuilder, MessageFlags } = require('discord.js');
 const axios = require('axios');
 const { logCommand } = require('../../logger');
 const config = require('../../config');
+const getUserConsent = require('../../utils/getUserConsent');
 
 module.exports = {
     data: new SlashCommandBuilder()
@@ -26,6 +27,24 @@ module.exports = {
         const username = interaction.options.getString('username');
         const start = interaction.options.getString('start');
         const end = interaction.options.getString('end');
+
+        // Check if the user who invoked the command has given consent
+        const userConsent = await getUserConsent(interaction.user.id);
+        if (!userConsent) {
+            return interaction.reply({ content: 'You have not given consent for data collection. To respect your privacy, the bot does not store or access your activity data without your consent. You can give your consent by using the `/opt-in` command.', flags: MessageFlags.Ephemeral });
+        }
+
+        // Check if the target user exists
+        const targetUser = interaction.guild.members.cache.find(member => member.user.username === username);
+        if (!targetUser) {
+            return interaction.reply({ content: 'The user you are querying does not exist.', flags: MessageFlags.Ephemeral });
+        }
+
+        // Check if the target user has given consent
+        const targetUserConsent = await getUserConsent(targetUser.id);
+        if (!targetUserConsent) {
+            return interaction.reply({ content: 'The user you are querying has not given consent for data collection.', flags: MessageFlags.Ephemeral });
+        }
 
         // Try to fetch user activity from the backend
         try {

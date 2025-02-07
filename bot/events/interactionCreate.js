@@ -15,11 +15,6 @@ module.exports = {
 
 
             try {
-                const consent = await getUserConsent(interaction.user.id);
-                if (interaction.commandName === 'useractivity' && !consent) {
-                    await interaction.reply({ content: 'You have not given consent for data collection. To respect your privacy, the bot does not store or access your activity data without your consent. You can give your consent by using the \`/opt-in\` command.', flags: MessageFlags.Ephemeral });
-                    return;
-                }
                 await command.execute(interaction);
             } catch (error) {
                 console.error(error);
