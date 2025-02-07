@@ -98,9 +98,12 @@ async function generateWithHorde(prompt) {
         const initialResponse = await axios.post("https://stablehorde.net/api/v2/generate/text/async", {
             prompt: prompt,
             params: {
-                max_context_length: 100,
-                max_length: 60,
-                temperature: 0.9
+                "max_context_length": 200,
+                "max_length": 200,
+		"frmttriminc": true,
+                "temperature": 1,
+		"top_p": 0.9,
+		"rep_pen": 1.2
             }
         }, {
             headers: { "apikey": process.env.HORDE_API_KEY }
@@ -126,7 +129,7 @@ async function generateWithHorde(prompt) {
             }
 
             // Wait for a short period before polling again
-            await new Promise(resolve => setTimeout(resolve, 2000));
+            await new Promise(resolve => setTimeout(resolve, 4000));
         }
 
         return resultResponse.data.generations[0].text || `Ah, a mysterious DM appears...\nUnfortunately, I do not possess the means to converse here.\nAs the wise say, *'The stars only align when we gather together.'*\n\nThis message, however, has been recorded in the logs, as a reminder from the past to the future.\nBeware, for all messages may one day reveal their secrets.`;
@@ -147,7 +150,7 @@ client.on('messageCreate', async message => {
     // if the message is a DM and Horde is enabled, log it and reply with a generated message, else reply with a default message
     if (!message.guild && !message.author.bot) {
         const authorName = message.author.nickname || message.author.username;
-        const replyMessage = await generateWithHorde("Respond to this with a slight humor, yet maintaining an mysterious feeling: " + message.content);
+        const replyMessage = await generateWithHorde("Respond shortly to this given message with a slight mystical humor: " + message.content);
         console.log(`DM Received from ${message.author.tag}: ${message.content}`);
         logCommand('DM from', authorName, { message: message.content });
 
