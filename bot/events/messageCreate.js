@@ -1,9 +1,8 @@
-const { generateWithHorde } = require('../utils/generateWithHorde');
 const sendPostRequest = require('../utils/sendPostRequest');
 const getUserConsent = require('../utils/getUserConsent');
+const generateWithHorde = require('../utils/generateWithHorde');
 const { logCommand } = require('../logger');
 const config = require('../config');
-
 
 module.exports = {
     name: 'messageCreate',
@@ -23,8 +22,17 @@ async function handleDirectMessage(message) {
     logCommand('DM from', authorName, { message: message.content });
 
     if (config.hordeEnabled) {
-        const replyMessage = await generateWithHorde("Respond shortly to this given message with a slight mystical humor: " + message.content);
-        message.reply(replyMessage);
+        // Show typing indicator while generating response
+        let typing = setInterval(() => message.channel.sendTyping(), 5000); // Jatkuva indikaattori
+        try {
+            const replyMessage = await generateWithHorde(message.content);
+            clearInterval(typing); // Delete typing indicator when response is ready
+            message.reply(replyMessage);
+        } catch {
+            console.error("Error in AI Horde request");
+            message.reply("Something went critically wrong 🤔");
+        }
+
     } else {
         try {
             await message.reply(`Ah, a mysterious DM appears...\nUnfortunately, I do not possess the means to converse here.\nAs the wise say, *'The stars only align when we gather together.'*\n\nThis message, however, has been recorded in the logs, as a reminder from the past to the future.\nBeware, for all messages may one day reveal their secrets.`);
