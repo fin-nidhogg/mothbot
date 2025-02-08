@@ -42,15 +42,26 @@ module.exports = {
                 console.log(`User ${interaction.user.tag} has declined data collection.`);
 
             } else if (interaction.customId === 'optout_confirm') {
-                // Logic to remove the user from the data collection (opt-out)
-                // Add any necessary code to delete the user's data or update the system.
-                updateUserConsent(interaction.user.id, false);
-                console.log(`User ${interaction.user.tag} has opted out of data collection.`);
 
-                await interaction.reply({
-                    content: `You have successfully opted out of data collection.Your data will be deleted shortly.`,
-                    flags: MessageFlags.Ephemeral
-                });
+                // Logic to flag the user to be deleted from the data collection (opt-out)
+                // Check if the user has already opted out
+                if (!getUserConsent(interaction.user.id)) {
+                    await interaction.reply({
+                        content: `You have already opted out of data collection. If you have changed your mind, you can opt back in at any time using \`/opt-in\`.`,
+                        flags: MessageFlags.Ephemeral
+                    });
+                    // Consent found so let's update the user consent to false
+                } else {
+                    updateUserConsent(interaction.user.id, false);
+                    console.log(`User ${interaction.user.tag} has opted out of data collection.`);
+
+                    await interaction.reply({
+                        content: `You have successfully opted out of data collection.Your data will be deleted shortly. If you change your mind, you can opt back in at any time using \`/opt-in\` \n\n**Note:** _Your data may still be stored in backups for a limited time._`,
+                        flags: MessageFlags.Ephemeral
+                    });
+                }
+
+
             } else if (interaction.customId === 'optout_cancel') {
 
                 // Cancel the opt-out action no action needed

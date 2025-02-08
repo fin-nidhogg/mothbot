@@ -27,7 +27,7 @@ module.exports = {
 🔒 **Data Retention and Your Rights**  
 - **Retention:** Data is stored for **up to 2 years**, after which it is permanently deleted.  
 - **Access & Removal:** You have the right to view and delete your data:  
-  - **View your data:** Use \`/mydata\`.  
+  - **View your data:** Use \`/mydata\` (Currently not working so email if you want to check you data).  
   - **Withdraw consent & delete your data:** Use \`/opt-out\` to remove your stored data.  
 \nDo you consent to data collection?`,
             components: [row],
