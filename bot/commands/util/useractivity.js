@@ -31,7 +31,7 @@ module.exports = {
         // Check if the user who invoked the command has given consent
         const userConsent = await getUserConsent(interaction.user.id);
         if (!userConsent) {
-            return interaction.reply({ content: 'You have not given consent for data collection. To respect your privacy, the bot does not store or access your activity data without your consent. You can give your consent by using the `/opt-in` command.', flags: MessageFlags.Ephemeral });
+            return interaction.reply({ content: 'You have not given consent for data collection. To respect your privacy, the bot does not store or access your activity data without your consent. You can give your consent by using the \`/opt-in\` command.', flags: MessageFlags.Ephemeral });
         }
 
         // Check if the target user exists
