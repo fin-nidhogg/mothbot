@@ -29,12 +29,19 @@ module.exports = {
         // Handle button interactions
         else if (interaction.isButton()) {
             if (interaction.customId === 'optin_accept') {
-                await interaction.reply({ content: '✅ **You have opted in to data collection.** You can withdraw your consent at any time by using /opt-out.', flags: MessageFlags.Ephemeral });
-
-                // Store user consent in a database.
-                updateUserConsent(interaction.user.id, true);
-                console.log(`User ${interaction.user.tag} has opted in to data collection.`);
-
+                // Check if the user has already opted in for data collection
+                const consent = await getUserConsent(interaction.user.id);
+                if (consent) {
+                    await interaction.reply({ content: '✅ **You have already opted in to data collection.**', flags: MessageFlags.Ephemeral });
+                    return;
+                }
+                else {
+                    // User has opted in for data collection
+                    await interaction.reply({ content: '✅ **You have opted in to data collection.** You can withdraw your consent at any time by using /opt-out.', flags: MessageFlags.Ephemeral });
+                    // Store user consent in a database.
+                    updateUserConsent(interaction.user.id, true);
+                    console.log(`User ${interaction.user.tag} has opted in to data collection.`);
+                }
             } else if (interaction.customId === 'optin_reject') {
                 await interaction.reply({ content: '❌ You have declined data collection.', flags: MessageFlags.Ephemeral });
 
@@ -45,7 +52,8 @@ module.exports = {
 
                 // Logic to flag the user to be deleted from the data collection (opt-out)
                 // Check if the user has already opted out
-                if (!getUserConsent(interaction.user.id)) {
+                const consent = await getUserConsent(interaction.user.id);
+                if (!consent) {
                     await interaction.reply({
                         content: `You have already opted out of data collection. If you have changed your mind, you can opt back in at any time using \`/opt-in\`.`,
                         flags: MessageFlags.Ephemeral

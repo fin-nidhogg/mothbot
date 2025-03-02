@@ -1,4 +1,4 @@
-const sendPostRequest = require('../utils/sendPostRequest');
+const { postUserdata, postGeneralStats } = require('../utils/postStats');
 const getUserConsent = require('../utils/getUserConsent');
 const generateWithHorde = require('../utils/generateWithHorde');
 const { logCommand } = require('../logger');
@@ -47,18 +47,25 @@ async function handleDirectMessage(message) {
 async function handleGuildMessage(message) {
     if (message.author.bot) return;
 
+    // Get message info for sending to the API
+    const guildId = message.guildId;
+    const channelId = message.channelId;
+    const channelName = message.channel.name;
+    const userId = message.author.id;
+    const username = message.author.username;
+    const nickname = message.member ? message.member.displayName : null;
+
+    // Log general stats to database
+    postGeneralStats(guildId, channelId, channelName);
+
     // check if user has given consent to log messages in our database
     const consent = await getUserConsent(message.author.id);
     if (!consent) {
+        // User has not given consent, store only general stats
         console.log(`User ${message.author.id} has not given consent, moving on.`);
         return;
     } else {
-        const guildId = message.guildId;
-        const channelId = message.channelId;
-        const channelName = message.channel.name;
-        const userId = message.author.id;
-        const username = message.author.username;
-        const nickname = message.member ? message.member.displayName : null;
-        sendPostRequest(guildId, channelId, channelName, userId, username, nickname);
+        // User has given consent, store message info to database
+        postUserdata(guildId, channelId, channelName, userId, username, nickname);
     }
 }
