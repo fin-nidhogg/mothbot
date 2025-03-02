@@ -30,7 +30,8 @@ module.exports = {
         else if (interaction.isButton()) {
             if (interaction.customId === 'optin_accept') {
                 // Check if the user has already opted in for data collection
-                if (getUserConsent(interaction.user.id)) {
+                const consent = await getUserConsent(interaction.user.id);
+                if (consent) {
                     await interaction.reply({ content: '✅ **You have already opted in to data collection.**', flags: MessageFlags.Ephemeral });
                     return;
                 }
@@ -51,7 +52,8 @@ module.exports = {
 
                 // Logic to flag the user to be deleted from the data collection (opt-out)
                 // Check if the user has already opted out
-                if (!getUserConsent(interaction.user.id)) {
+                const consent = await getUserConsent(interaction.user.id);
+                if (!consent) {
                     await interaction.reply({
                         content: `You have already opted out of data collection. If you have changed your mind, you can opt back in at any time using \`/opt-in\`.`,
                         flags: MessageFlags.Ephemeral

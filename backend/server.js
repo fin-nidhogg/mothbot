@@ -1,15 +1,22 @@
 const express = require('express');
 const moment = require('moment');
+const fs = require('fs');
+const https = require('https');
+const http = require('http');
 const UserStats = require('./models/user_stats');
 const UserConsent = require('./models/UserConsents');
 const GeneralStats = require('./models/general_stats');
-
-const app = express();
 const helmet = require('helmet');
+
+// Load environment variables from .env file
+const envFile = process.env.NODE_ENV === 'production' ? '.env.production' : '.env.development';
+require('dotenv').config({ path: envFile });
+
+// Create Express app
+const app = express();
 
 // Require the database connection file
 const dbConnection = require('./dbConnection');
-
 
 // Add helmet middleware to secure the Express app
 app.use(helmet());
@@ -271,7 +278,35 @@ app.get('/consent/:userId', async (req, res) => {
     }
 });
 
-// Start server
-app.listen(process.env.SERVER_PORT, () => {
-    console.log(`Server is running on port ${process.env.SERVER_PORT}`);
+
+// Redirect HTTP to HTTPS
+const httpApp = express();
+httpApp.use((req, res, next) => {
+    if (req.secure) {
+        return next();
+    }
+    res.redirect(`https://${req.headers.host}${req.url}`);
 });
+
+// Start HTTP server
+http.createServer(httpApp).listen(80, () => {
+    console.log('HTTP server running on port 80');
+});
+
+// Conditionally start HTTPS server if USE_SSL is true
+if (process.env.USE_SSL === 'true') {
+    const sslOptions = {
+        key: fs.readFileSync(process.env.SSL_KEY_PATH),
+        cert: fs.readFileSync(process.env.SSL_CERT_PATH),
+        ca: fs.readFileSync(process.env.SSL_CA_PATH) // If you have a CA bundle
+    };
+
+    https.createServer(sslOptions, app).listen(443, () => {
+        console.log('HTTPS server running on port 443');
+    });
+} else {
+    // Start HTTP server if USE_SSL is false
+    app.listen(process.env.SERVER_PORT, () => {
+        console.log(`Server is running on port ${process.env.SERVER_PORT}`);
+    });
+}
