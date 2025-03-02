@@ -29,12 +29,18 @@ module.exports = {
         // Handle button interactions
         else if (interaction.isButton()) {
             if (interaction.customId === 'optin_accept') {
-                await interaction.reply({ content: '✅ **You have opted in to data collection.** You can withdraw your consent at any time by using /opt-out.', flags: MessageFlags.Ephemeral });
-
-                // Store user consent in a database.
-                updateUserConsent(interaction.user.id, true);
-                console.log(`User ${interaction.user.tag} has opted in to data collection.`);
-
+                // Check if the user has already opted in for data collection
+                if (getUserConsent(interaction.user.id)) {
+                    await interaction.reply({ content: '✅ **You have already opted in to data collection.**', flags: MessageFlags.Ephemeral });
+                    return;
+                }
+                else {
+                    // User has opted in for data collection
+                    await interaction.reply({ content: '✅ **You have opted in to data collection.** You can withdraw your consent at any time by using /opt-out.', flags: MessageFlags.Ephemeral });
+                    // Store user consent in a database.
+                    updateUserConsent(interaction.user.id, true);
+                    console.log(`User ${interaction.user.tag} has opted in to data collection.`);
+                }
             } else if (interaction.customId === 'optin_reject') {
                 await interaction.reply({ content: '❌ You have declined data collection.', flags: MessageFlags.Ephemeral });
 
