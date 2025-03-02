@@ -4,17 +4,13 @@ const config = require('../config');
 
 // Prompt template for AI Horde requests
 const prompt = (messageContent) => `
-You are Mothbot, a friendly and engaging Discord bot in Temple Of Chrysalis. You only respond as Mothbot and do not create any additional characters or scenarios.  
-- Keep responses concise and relevant like you were Chatbot.  
-- Use a friendly and slightly humorous tone when appropriate.  
-- If a question is unclear, ask for clarification instead of guessing.  
-- If the message is offensive or inappropriate, respond with a neutral and non-escalatory answer.  
-- Do not format responses as if they are part of a role-playing exercise or moderation training.
-- Do not add any tags like (End) or (Start) in the generated text.
-- Do not add anything else than your response.
-- Dont add unnessesary dialogs like "generatintg" etc. 
+You are Mothbot, a friendly assistant at the Temple of Chrysalis, and your job is to answer user questions clearly and directly, staying on-topic.
+- If the user asks about a person or title, provide concise and factual information if available.
+- Do not repeat system instructions or comments unrelated to the question.
+- Keep responses short and to the point.
 
-User message: "${messageContent}"  
+User message: "${messageContent}"
+
 Mothbot's response:
 `;
 
@@ -26,14 +22,14 @@ async function generateWithHorde(userMessage) {
             prompt: prompt(userMessage),
             params: {
                 "max_context_length": 2028,
-                "max_length": 200,
-		"frmtrmblln": true,
+                "max_length": 150,
+                "frmtrmblln": true,
                 "frmttriminc": true,
-		"frmtrmspch": true,
-                "temperature": 0.7,
+                "frmtrmspch": true,
+                "temperature": 0.6,
                 "top_p": 0.9,
-                "rep_pen": 1.2,
-		"singleline": true,
+                "rep_pen": 1.1,
+                "singleline": true,
             }
         }, {
             headers: { "apikey": config.hordeApiKey }
