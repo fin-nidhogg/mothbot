@@ -23,7 +23,7 @@ const generalStatsRoutes = require('./routes/generalStatsRoutes');
 
 // Use routes
 app.use('/user-stats', userStatsRoutes);
-app.use('/consent', userConsentRoutes);
+app.use('/user-consent', userConsentRoutes);
 app.use('/general-stats', generalStatsRoutes);
 
 // Test route
