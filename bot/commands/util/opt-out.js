@@ -1,4 +1,5 @@
 const { SlashCommandBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle, MessageFlags } = require('discord.js');
+const getUserConsent = require('../../utils/getUserConsent');
 
 module.exports = {
     data: new SlashCommandBuilder()
@@ -17,6 +18,16 @@ module.exports = {
                 .setStyle(ButtonStyle.Danger)
         );
 
+        // Check if the user has already opted out of data collection or havn't opted in yet
+        const consent = await getUserConsent(interaction.user.id);
+        if (!consent) {
+            await interaction.reply({
+                content: `\n❌  **You have not opted in to data collection yet.**\nYou can always opt in using command: \`/opt-in\`.`,
+                flags: MessageFlags.Ephemeral
+            });
+            return;
+        }
+        // Else open the withdraw consent dialog
         await interaction.reply({
             content: `You are about to withdraw your consent for data collection. Are you sure you want to opt-out?\n
 **Data will no longer be collected**, and your existing data will be deleted. You can always opt back in later.\n
