@@ -1,4 +1,5 @@
 const { SlashCommandBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle, MessageFlags } = require('discord.js');
+const getUserConsent = require('../../utils/getUserConsent');
 
 module.exports = {
     data: new SlashCommandBuilder()
@@ -17,8 +18,18 @@ module.exports = {
                 .setStyle(ButtonStyle.Danger)
         );
 
+        // Check if the user has already given consent
+        const consent = await getUserConsent(interaction.user.id);
+        if (consent) {
+            await interaction.reply({
+                content: `\n✅  **You have already opted in to data collection.** \n\nPerhaps you change your mind?\nUse \`/opt-out\` to withdraw your consent.`,
+                flags: MessageFlags.Ephemeral
+            });
+            return;
+        }
+        // Else open the consent dialog
         await interaction.reply({
-            content: `**📢 Data Collection Notice**\n\nThis bot collects activity data on this server to provide statistics and engagement insights.\n
+            content: `\n**📢 Data Collection Notice**\n\nThis bot collects activity data on this server to provide statistics and engagement insights.\n
 ✅ **What data is collected?**  
 - The number of messages you send per day and per channel (**not message content**)  
 - The channels where messages are sent  
