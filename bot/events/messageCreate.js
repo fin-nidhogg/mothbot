@@ -23,7 +23,9 @@ async function handleDirectMessage(message) {
     if (config.hordeEnabled) {
         console.log(`DM Received from ${message.author.tag}: Responding with AI Horde...`);
         // Show typing indicator while generating response
-        let typing = setInterval(() => message.channel.sendTyping(), 5000); // Jatkuva indikaattori
+        let typing = setInterval(() => message.channel.sendTyping(), 5000); // Send "Writing..." every 5 seconds so discord wont timeout
+
+        // Generate response using AI Horde
         try {
             const replyMessage = await generateWithHorde(message.content);
             clearInterval(typing); // Delete typing indicator when response is ready

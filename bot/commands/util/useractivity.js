@@ -48,8 +48,8 @@ module.exports = {
 
         // Try to fetch user activity from the backend
         try {
-            console.log('Fetching from:', `${config.apiUrl}:${config.apiPort}/top-channels/`);
-            const response = await axios.get(`${config.apiUrl}:${config.apiPort}/top-channels/`, {
+            console.log('Fetching from:', `${config.apiUrl}:${config.apiPort}/user-stats/top-channels/`);
+            const response = await axios.get(`${config.apiUrl}:${config.apiPort}/user-stats/top-channels/`, {
                 params: {
                     username: username,
                     start: start,
