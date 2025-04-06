@@ -3,7 +3,7 @@ const config = require('../config');
 
 async function updateUserConsent(userId, consent) {
     try {
-        const response = await axios.post(`${config.apiUrl}:${config.apiPort}/user-consent`, {
+        const response = await axios.post(`${config.apiUrl}/user-consent`, {
             userId,
             consent
         });
