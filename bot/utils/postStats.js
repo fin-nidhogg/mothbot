@@ -4,7 +4,7 @@ const config = require('../config'); // Import the config file
 // Function to send a POST request to the bot's own db API for user data
 async function postUserdata(guildId, channelId, channelName, userId, username, nickname) {
     try {
-        const response = await axios.post(`${config.apiUrl}:${config.apiPort}/user-stats/add`, {
+        const response = await axios.post(`${config.apiUrl}/user-stats/add`, {
             guildId,
             channelId,
             channelName,
@@ -21,7 +21,7 @@ async function postUserdata(guildId, channelId, channelName, userId, username, n
 // Function to send a POST request to the bot's own db API for general stats
 async function postGeneralStats(guildId, channelId, channelName) {
     try {
-        const response = await axios.post(`${config.apiUrl}:${config.apiPort}/general-stats/add`, {
+        const response = await axios.post(`${config.apiUrl}/general-stats/add`, {
             guildId,
             channelId,
             channelName,

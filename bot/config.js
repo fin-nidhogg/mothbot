@@ -9,7 +9,6 @@ dotenv.config({ path: path.resolve(__dirname, envFile) });
 
 module.exports = {
     apiUrl: process.env.API_URL,
-    apiPort: process.env.API_PORT,
     hordeApiKey: process.env.HORDE_API_KEY,
     hordeEnabled: process.env.HORDE_ENABLED === 'true',
     appToken: process.env.APP_TOKEN,
