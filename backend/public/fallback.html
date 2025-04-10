@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Mothbot – Project Info</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html,
+        body {
+            height: 100%;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            color: #fff;
+            background-color: #000;
+            overflow: hidden;
+        }
+
+        body {
+            background: url('bg.jpeg') no-repeat center center fixed;
+            background-size: cover;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            animation: fadeIn 2s ease-in-out;
+        }
+
+        .overlay {
+            background-color: rgba(0, 0, 0, 0.7);
+            padding: 3rem;
+            border-radius: 1rem;
+            max-width: 640px;
+            backdrop-filter: blur(6px);
+            box-shadow: 0 0 20px rgba(138, 43, 226, 0.3);
+        }
+
+        h1 {
+            font-size: 2.75rem;
+            margin-bottom: 1.25rem;
+            color: #eaeaea;
+            text-shadow: 0 0 10px rgba(255, 255, 255, 0.1);
+        }
+
+        p {
+            font-size: 1.15rem;
+            line-height: 1.6;
+            margin-bottom: 1rem;
+            color: #cccccc;
+        }
+
+        a.button {
+            display: inline-block;
+            margin-top: 1rem;
+            padding: 0.75rem 1.5rem;
+            background: linear-gradient(135deg, #6c2dc7, #9a4dff);
+            color: #fff;
+            text-decoration: none;
+            border-radius: 0.5rem;
+            font-weight: bold;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+            box-shadow: 0 4px 12px rgba(106, 51, 163, 0.4);
+        }
+
+        a.button:hover {
+            transform: scale(1.05);
+            box-shadow: 0 6px 18px rgba(106, 51, 163, 0.6);
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+            }
+
+            to {
+                opacity: 1;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="overlay">
+        <h1>Welcome to Mothbot API</h1>
+        <p>This endpoint is part of the <strong>Mothbot project</strong>—an advanced community bot designed to support
+            the Temple of Chrysalis on Discord.</p>
+        <p>It offers features like activity statistics, moderation tools, and smart interactions tailored for digital
+            spiritual communities.</p>
+        <p style="color: #6c2dc7;">You have most likely reached this place through unusual means.
+            The endpoint you seek is not meant to be approached so directly.</p>
+
+        <a href="https://templeofchrysalis.com/" target="_blank" class="button">Visit Official Website</a>
+    </div>
+</body>
+
+</html>

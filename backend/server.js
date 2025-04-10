@@ -1,6 +1,7 @@
 const express = require('express');
 const helmet = require('helmet');
 const dotenv = require('dotenv');
+const path = require('path');
 
 // Load environment variables from .env file
 const envFile = process.env.NODE_ENV === 'production' ? '.env.production' : '.env.development';
@@ -11,6 +12,9 @@ const app = express();
 
 // Require the database connection file
 require('./dbConnection');
+
+// Middleware to serve static files from the 'public' directory
+app.use(express.static(path.join(__dirname, 'public')));
 
 // Add helmet middleware to secure the Express app
 app.use(helmet());
@@ -28,7 +32,7 @@ app.use('/general-stats', generalStatsRoutes);
 
 // Test route
 app.get('/', (req, res) => {
-    res.send('Hello World');
+    res.sendFile(path.join(__dirname, 'public', 'fallback.html'));
 });
 
 // Start server
