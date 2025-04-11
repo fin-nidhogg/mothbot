@@ -1,7 +1,8 @@
-const { SlashCommandBuilder, MessageFlags } = require('discord.js');
-const axios = require('axios');
-const { logCommand } = require('../../logger');
 const config = require('../../config');
+const axios = require('../../utils/axiosInstance'); // Import the axios instance with chrysalis API specific headers
+
+const { SlashCommandBuilder, MessageFlags } = require('discord.js');
+const { logCommand } = require('../../logger');
 const getUserConsent = require('../../utils/getUserConsent');
 
 module.exports = {

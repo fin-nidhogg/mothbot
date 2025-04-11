@@ -33,7 +33,7 @@ module.exports = {
 **Data will no longer be collected**, and your existing data will be deleted. You can always opt back in later.\n
 Do you want to proceed?`,
             components: [row],
-            flags: MessageFlags.Ephemeral// Only the user sees this message
+            flags: MessageFlags.Ephemeral // Only the user sees this message
         });
     }
 };

@@ -1,4 +1,4 @@
-const axios = require('axios');
+const axios = require('./axiosInstance'); // import the axios instance with chrysalis API specific headers
 const config = require('../config'); // Import the config file
 
 // Function to send a POST request to the bot's own db API for user data
@@ -12,9 +12,9 @@ async function postUserdata(guildId, channelId, channelName, userId, username, n
             username,
             nickname,
         });
-        console.log('Data sent successfully:', response.status + ' ' + response.statusText);
+        console.log('Bot - Data sent successfully:', response.status + ' ' + response.statusText);
     } catch (error) {
-        console.error('Error sending data:', error);
+        console.error('Bot - Error sending data:', error);
     }
 }
 
@@ -26,9 +26,9 @@ async function postGeneralStats(guildId, channelId, channelName) {
             channelId,
             channelName,
         });
-        console.log('General stats sent successfully:', response.status + ' ' + response.statusText);
+        console.log('Bot - General stats sent successfully:', response.status + ' ' + response.statusText);
     } catch (error) {
-        console.error('Error sending general stats:', error);
+        console.error('Bot - Error sending general stats:', error);
     }
 }
 
