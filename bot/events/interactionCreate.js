@@ -1,5 +1,6 @@
 const { MessageFlags } = require('discord.js');
 const updateUserConsent = require('../utils/updateUserConsent');
+const { deleteUserData } = require('../utils/deleteUserData');
 const { fetchAndSendMessages } = require('../utils/fetchAndSendMessages');
 
 module.exports = {
@@ -75,7 +76,15 @@ module.exports = {
 
                 // Update the user consent to false
                 updateUserConsent(interaction.user.id, false);
+
                 console.log(`User ${interaction.user.tag} has opted out of data collection.`);
+                // Call the function to delete user data
+                try {
+                    await deleteUserData(interaction.user.id);
+                    console.log(`User data for ${interaction.user.tag} has been deleted.`);
+                } catch (error) {
+                    console.error(`Failed to delete user data for ${interaction.user.tag}:`, error);
+                }
 
                 // Send a confirmation message to the user
                 await interaction.editReply({

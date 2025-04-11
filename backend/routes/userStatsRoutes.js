@@ -8,6 +8,7 @@ router.use(verifySignature); // Apply the authentication middleware to all route
 
 router.post('/add', userStatsController.addOrUpdateUserStats);
 router.post('/process-messages', userStatsController.processUserMessages);
+router.delete('/delete-user/:userId', userStatsController.deleteUserData); // New route for deleting user data
 
 router.get('/stats', userStatsController.getUserStats);
 router.get('/top-channels', userStatsController.getTopChannels);

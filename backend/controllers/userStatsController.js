@@ -105,6 +105,26 @@ exports.addOrUpdateUserStats = async (req, res) => {
     }
 };
 
+// Controller function to delete all data related to a specific user
+exports.deleteUserData = async (req, res) => {
+    const { userId } = req.params;
+
+    try {
+        // Delete user stats
+        const userStatsResult = await UserStats.deleteMany({ userId });
+        console.log(`Deleted ${userStatsResult.deletedCount} user stats documents for user ${userId}`);
+
+        res.status(200).json({
+            message: `All data related to user ${userId} has been deleted.`,
+            deletedStats: userStatsResult.deletedCount,
+        });
+
+    } catch (error) {
+        console.error('Error deleting user data:', error);
+        res.status(500).json({ message: 'Internal server error while deleting user data.' });
+    }
+};
+
 // Controller function to get user stats
 exports.getUserStats = async (req, res) => {
     const { username, userid: userId, start, end } = req.query;
