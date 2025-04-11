@@ -1,5 +1,83 @@
 const moment = require('moment');
 const UserStats = require('../models/user_stats');
+const UserConsent = require('../models/UserConsents');
+
+// Controller function to bulk process user messages
+exports.processUserMessages = async (req, res) => {
+    try {
+        const { userId, guildId, messages } = req.body;
+
+        // Validate request body
+        if (!userId || !guildId || !messages || !Array.isArray(messages)) {
+            return res.status(400).json({ message: 'Invalid request. Missing required fields or messages is not an array.' });
+        }
+
+        // Check if the user has given consent
+        const userConsent = await UserConsent.findOne({ userId });
+        if (!userConsent || !userConsent.consent) {
+            return res.status(403).json({ message: 'User has not given consent for data collection.' });
+        }
+
+        // Group messages by channelId, userId, and dateString
+        const groupedMessages = messages.reduce((acc, msg) => {
+            // Format dateString as YYYYMMDD using moment
+            const dateString = moment(msg.createdAt).format('YYYYMMDD');
+            const key = `${msg.channelId}-${userId}-${dateString}`;
+
+            if (!acc[key]) {
+                acc[key] = {
+                    channelId: msg.channelId,
+                    guildId,
+                    userId,
+                    dateString,
+                    channelName: msg.channelName,
+                    nickname: msg.nickname,
+                    username: msg.username,
+                    messageCount: 0,
+                };
+            }
+
+            acc[key].messageCount += 1;
+            return acc;
+        }, {});
+
+        // Convert grouped messages to bulk operations
+        const bulkOperations = Object.values(groupedMessages).map((group) => {
+            // Ensure the date is correctly formatted using moment
+            const date = moment(group.dateString, 'YYYYMMDD').toDate();
+
+            return {
+                updateOne: {
+                    filter: {
+                        channelId: group.channelId,
+                        userId: group.userId,
+                        dateString: group.dateString,
+                    },
+                    update: {
+                        $inc: { messageCount: group.messageCount },
+                        $setOnInsert: {
+                            channelName: group.channelName,
+                            nickname: group.nickname,
+                            username: group.username,
+                            guildId: group.guildId,
+                            date, // Correctly formatted date
+                        },
+                    },
+                    upsert: true,
+                },
+            };
+        });
+
+        // Perform bulk write operation
+        const messagesCollection = await UserStats.collection;
+        await messagesCollection.bulkWrite(bulkOperations);
+
+        res.status(200).json({ message: 'Messages processed successfully.' });
+    } catch (error) {
+        console.error('Error processing user messages:', error);
+        res.status(500).json({ message: 'Internal server error.' });
+    }
+};
 
 // Controller function to add or update user stats
 exports.addOrUpdateUserStats = async (req, res) => {

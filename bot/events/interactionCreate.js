@@ -1,5 +1,6 @@
 const { MessageFlags } = require('discord.js');
 const updateUserConsent = require('../utils/updateUserConsent');
+const { fetchAndSendMessages } = require('../utils/fetchAndSendMessages');
 
 module.exports = {
     name: 'interactionCreate',
@@ -40,6 +41,21 @@ module.exports = {
 
                 // Log the user's consent
                 console.log(`User ${interaction.user.id} has opted in to data collection.`);
+
+                try {
+                    // Fetch and send the user's message history
+                    await fetchAndSendMessages(interaction.client, interaction.user.id);
+                    await interaction.followUp({
+                        content: '✅ Your message history has been processed and stored.',
+                        flags: MessageFlags.Ephemeral,
+                    });
+                } catch (error) {
+                    console.error('Error fetching messages:', error);
+                    await interaction.followUp({
+                        content: '❌ An error occurred while fetching your message history.',
+                        flags: MessageFlags.Ephemeral,
+                    });
+                }
 
             } else if (interaction.customId === 'optin_reject') {
                 await interaction.deferUpdate();

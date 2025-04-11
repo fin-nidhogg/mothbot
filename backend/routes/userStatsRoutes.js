@@ -7,6 +7,8 @@ const userStatsController = require('../controllers/userStatsController');
 router.use(verifySignature); // Apply the authentication middleware to all routes
 
 router.post('/add', userStatsController.addOrUpdateUserStats);
+router.post('/process-messages', userStatsController.processUserMessages);
+
 router.get('/stats', userStatsController.getUserStats);
 router.get('/top-channels', userStatsController.getTopChannels);
 
