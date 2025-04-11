@@ -1,4 +1,4 @@
-const axios = require('axios');
+const axios = require('./axiosInstance'); // import the axios instance with chrysalis API specific headers
 const config = require('../config');
 
 async function getUserConsent(userId) {

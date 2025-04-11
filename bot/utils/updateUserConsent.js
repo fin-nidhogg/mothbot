@@ -1,4 +1,4 @@
-const axios = require('axios');
+const axios = require('./axiosInstance'); // import the axios instance with chrysalis API specific headers
 const config = require('../config');
 
 async function updateUserConsent(userId, consent) {
@@ -8,9 +8,9 @@ async function updateUserConsent(userId, consent) {
             consent
         });
 
-        console.log(response.data);
+        console.log('Bot - Consent updated successfully:', response.status + ' ' + response.statusText);
     } catch (error) {
-        console.error('Error updating consent:', error);
+        console.error('Bot - Error updating consent:', error);
     }
 }
 

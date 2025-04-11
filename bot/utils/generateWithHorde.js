@@ -1,6 +1,5 @@
-const axios = require('axios');
+const axios = require('axios'); // Use generic axios for external API requests
 const config = require('../config');
-
 
 // Prompt template for AI Horde requests
 const prompt = (messageContent) => `

@@ -16,4 +16,5 @@ module.exports = {
     guildId: process.env.GUILD_ID,
     helpchannelId: process.env.HELP_CHANNEL_ID,
     questionchannelId: process.env.QUESTIONS_CHANNEL_ID,
+    botSecret: process.env.BOT_SECRET,
 };
