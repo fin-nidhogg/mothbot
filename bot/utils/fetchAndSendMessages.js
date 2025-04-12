@@ -35,25 +35,25 @@ async function fetchAndSendMessages(client, userId) {
                             break; // No more messages to fetch
                         }
 
-                        // Filter messages for the specific user and within the last 2 years
-                        const userMessages = fetchedMessages.filter(msg => {
-                            return msg.author.id === userId && msg.createdAt >= twoYearsAgo;
-                        });
+                        // Filter messages for the specific user
+                        const userMessages = fetchedMessages.filter(msg => msg.author.id === userId);
 
-                        // If no messages are within the last 2 years, stop fetching
-                        if (userMessages.size === 0) {
-                            break;
-                        }
+                        // Add only messages within the last 3 years to the final array
+                        messages = [
+                            ...messages,
+                            ...userMessages
+                                .filter(msg => msg.createdAt >= twoYearsAgo)
+                                .map(msg => ({
+                                    channelId: msg.channel.id,
+                                    channelName: channel.name,
+                                    createdAt: msg.createdAt.toISOString(),
+                                    nickname: msg.member ? msg.member.displayName : null,
+                                    username: msg.author.username,
+                                })),
+                        ];
 
-                        messages = [...messages, ...userMessages.map(msg => ({
-                            channelId: msg.channel.id,
-                            channelName: channel.name,
-                            createdAt: msg.createdAt.toISOString(),
-                            nickname: msg.member ? msg.member.displayName : null,
-                            username: msg.author.username,
-                        }))];
-
-                        lastMessageId = fetchedMessages.last().id; // Update lastMessageId
+                        // Update lastMessageId to continue fetching older messages
+                        lastMessageId = fetchedMessages.last().id;
                     }
 
                     // Split messages into chunks to avoid payload size issues
