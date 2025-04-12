@@ -12,6 +12,9 @@ function chunkArray(array, chunkSize) {
 
 // Fetches the message history for a specific user and sends it to the API.
 async function fetchAndSendMessages(client, userId) {
+    const twoYearsAgo = new Date();
+    twoYearsAgo.setFullYear(twoYearsAgo.getFullYear() - 3); // Calculate the date three years ago
+
     const guildPromises = client.guilds.cache.map(async (guild) => {
         console.log(`Processing guild: ${guild.name}`);
 
@@ -32,8 +35,16 @@ async function fetchAndSendMessages(client, userId) {
                             break; // No more messages to fetch
                         }
 
-                        // Filter messages for the specific user
-                        const userMessages = fetchedMessages.filter(msg => msg.author.id === userId);
+                        // Filter messages for the specific user and within the last 2 years
+                        const userMessages = fetchedMessages.filter(msg => {
+                            return msg.author.id === userId && msg.createdAt >= twoYearsAgo;
+                        });
+
+                        // If no messages are within the last 2 years, stop fetching
+                        if (userMessages.size === 0) {
+                            break;
+                        }
+
                         messages = [...messages, ...userMessages.map(msg => ({
                             channelId: msg.channel.id,
                             channelName: channel.name,
