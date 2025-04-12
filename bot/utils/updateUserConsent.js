@@ -1,3 +1,6 @@
+const axios = require('./axiosInstance');
+const config = require('../config');
+
 /**
  * Updates the user's consent status in the API.
  * Sends a POST request to the API to update whether the user has opted in or out of data collection.

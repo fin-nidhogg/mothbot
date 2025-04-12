@@ -1,7 +1,6 @@
 const { MessageFlags, flatten } = require('discord.js');
 const updateUserConsent = require('../utils/updateUserConsent');
 const { deleteUserData } = require('../utils/deleteUserData');
-const { fetchAndSendMessages } = require('../utils/fetchAndSendMessages');
 
 module.exports = {
     name: 'interactionCreate',
@@ -65,27 +64,18 @@ async function handleButtonInteraction(interaction) {
 
 // Handle "opt-in accept" button
 async function handleOptInAccept(interaction) {
-    await interaction.deferReply({ content: 'OK', flags: MessageFlags.Ephemeral }); // Defer the reply so the bot doesn't timeout
+    await interaction.deferUpdate();
 
     // Store user consent
     updateUserConsent(interaction.user.id, true);
     console.log(`User ${interaction.user.id} has opted in to data collection.`);
 
-    // Notify the user that the process has started
-    await interaction.editReply({ content: '⏳ Fetching your message history. This may take a while...', flags: MessageFlags.Ephemeral });
-
-    try {
-        // Fetch and send the user's message history
-        await fetchAndSendMessages(interaction.client, interaction.user.id);
-
-        // Notify the user of success
-        await interaction.followUp({ content: '✅ Your message history has been successfully processed and stored.', flags: MessageFlags.Ephemeral });
-    } catch (error) {
-        console.error('Error fetching messages:', error);
-
-        // Notify the user of failure
-        await interaction.followUp({ content: '❌ An error occurred while fetching your message history. Please try again later.', flags: MessageFlags.Ephemeral });
-    }
+    // Notify the user of success
+    await interaction.editReply({
+        content: '\n✅  **You have opted in to data collection.**\nYou can withdraw your consent at any time by using `/opt-out`.',
+        components: [], // Remove buttons
+        flags: MessageFlags.Ephemeral,
+    });
 }
 
 // Handle "opt-in reject" button
