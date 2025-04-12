@@ -1,3 +1,4 @@
+const { MessageFlags } = require('discord.js');
 const { postUserdata, postGeneralStats } = require('../utils/postStats');
 const getUserConsent = require('../utils/getUserConsent');
 const generateWithHorde = require('../utils/generateWithHorde');

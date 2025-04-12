@@ -1,7 +1,13 @@
 const axios = require('axios'); // Use generic axios for external API requests
 const config = require('../config');
 
-// Prompt template for AI Horde requests
+/**
+ * Generates a prompt for AI Horde requests.
+ * This function creates a structured prompt for the AI Horde API based on the user's message.
+ *
+ * @param {string} messageContent - The user's message to include in the prompt.
+ * @returns {string} - The formatted prompt for the AI Horde API.
+ */
 const prompt = (messageContent) => `
 You are Mothbot, a friendly assistant at the Temple of Chrysalis, and your job is to answer user questions clearly and directly, staying on-topic.
 - If the user asks about a person or title, provide concise and factual information if available.
@@ -13,7 +19,13 @@ User message: "${messageContent}"
 Mothbot's response:
 `;
 
-// Function to make AI Horde requests
+/**
+ * Sends a request to the AI Horde API to generate a response based on the user's message.
+ * This function handles both the initial request and polling for the result.
+ *
+ * @param {string} userMessage - The user's message to send to the AI Horde API.
+ * @returns {Promise<string>} - Resolves to the generated response text or a fallback message in case of an error.
+ */
 async function generateWithHorde(userMessage) {
     try {
         // Initial request to generate text
@@ -34,9 +46,6 @@ async function generateWithHorde(userMessage) {
             headers: { "apikey": config.hordeApiKey }
         });
 
-        // Uncomment For debugging
-        //console.log('AI Horde initial response:', initialResponse.data);
-
         const requestId = initialResponse.data.id;
 
         // Polling for the result
@@ -45,9 +54,6 @@ async function generateWithHorde(userMessage) {
             resultResponse = await axios.get(`https://stablehorde.net/api/v2/generate/text/status/${requestId}`, {
                 headers: { "apikey": config.hordeApiKey }
             });
-
-            // Uncomment For debugging
-            // console.log('AI Horde polling response:', resultResponse.data);
 
             if (resultResponse.data.generations && resultResponse.data.generations.length > 0) {
                 break;
