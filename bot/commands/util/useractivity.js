@@ -68,7 +68,7 @@ module.exports = {
             // Debuggaukseen, kommentoi ulos tuotannossa
             //console.log('User activity:', userActivity);
 
-            // Get the user who requested the activity and write it to logfile  
+            // Log command usage 
             logCommand('useractivity', interaction.user.username, { username, start, end });
 
             // API Should handle empty responses and return a "No user activity found" message, but we'll check here just in case

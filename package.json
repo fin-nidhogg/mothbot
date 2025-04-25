@@ -1,5 +1,8 @@
 {
   "devDependencies": {
     "@types/node": "^22.14.0"
+  },
+  "dependencies": {
+    "node-cron": "^3.0.3"
   }
 }

@@ -30,6 +30,7 @@ app.use('/user-stats', userStatsRoutes);
 app.use('/user-consent', userConsentRoutes);
 app.use('/general-stats', generalStatsRoutes);
 
+
 // Test route
 app.get('/', (req, res) => {
     res.sendFile(path.join(__dirname, 'public', 'fallback.html'));

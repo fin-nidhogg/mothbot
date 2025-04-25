@@ -12,6 +12,8 @@ module.exports = {
                 .setRequired(true)),
 
     async execute(interaction) {
+        // Log command usage 
+        logCommand('Article search', interaction.user.username);
         const query = interaction.options.getString('query');
         const searchUrl = `https://templeofchrysalis.com/?s=${encodeURIComponent(query)}`;
 
