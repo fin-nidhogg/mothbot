@@ -16,7 +16,6 @@ async function createGitHubIssue(title, body) {
             {
                 title: title,
                 body: body,
-                labels: ['feedback'], // You can automatically tag issues if you want
             },
             {
                 headers: {
@@ -26,9 +25,17 @@ async function createGitHubIssue(title, body) {
             }
         );
 
-        console.log('[INFO] GitHub issue created successfully:', response.data.html_url);
+        console.log('[INFO] GitHub issue creation raw response:', response.data);
+
+        if (response.status === 201) {
+            console.log('[INFO] GitHub issue created successfully:', response.data.html_url);
+        } else {
+            console.warn('[WARNING] Unexpected status code:', response.status);
+        }
+
     } catch (error) {
         console.error('[ERROR] Failed to create GitHub issue:', error.response?.data || error.message);
+        throw error;
     }
 }
 
