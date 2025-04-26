@@ -3,12 +3,14 @@ const config = require('../config');
 
 /**
  * Calculates and sends the number of active users for the current day to the backend.
+ * Includes optional debug logs and gracefully handles channels without permissions.
  *
  * @param {Object} guild - The Discord guild object.
  * @param {string} backendUrl - The backend URL to send the data to.
+ * @param {boolean} debugMode - Whether to enable detailed debug output.
  * @returns {Promise<void>} - Resolves when the data is successfully sent.
  */
-async function sendDailyActiveUsers(guild, backendUrl) {
+async function sendDailyActiveUsers(guild, backendUrl, debugMode = false) {
     try {
         const activeUserSet = new Set();
 
@@ -19,16 +21,22 @@ async function sendDailyActiveUsers(guild, backendUrl) {
         const startOfToday = new Date();
         startOfToday.setHours(0, 0, 0, 0);
 
-        console.log(`Calculating active users since: ${startOfToday.toISOString()}`);
+        if (debugMode) {
+            console.log(`\n=== [DEBUG] Starting daily active user calculation ===`);
+            console.log(`[DEBUG] Calculating active users since: ${startOfToday.toISOString()}`);
+        }
 
         const textChannels = guild.channels.cache.filter(channel => channel.isTextBased());
 
-        // Calculate the number of non-bot members
         const nonBotMembersCount = guild.members.cache.filter(member => !member.user.bot).size;
+        if (debugMode) console.log(`[DEBUG] Non-bot members count: ${nonBotMembersCount}`);
+
+        let totalFetchedMessages = 0;
+        let totalSkippedChannels = 0;
 
         for (const [channelId, channel] of textChannels) {
             if (activeUserSet.size >= nonBotMembersCount) {
-                console.log('All users found before checking all channels.');
+                if (debugMode) console.log(`[DEBUG] All users found before checking all channels.`);
                 break;
             }
 
@@ -43,28 +51,35 @@ async function sendDailyActiveUsers(guild, backendUrl) {
                 try {
                     messages = await channel.messages.fetch(options);
                 } catch (error) {
-                    console.error(`Error fetching messages for channel ${channel.name}:`, error);
-                    break;
+                    if (debugMode) console.warn(`[DEBUG] Skipping channel "${channel.name}" (${channel.id}) - no permission to fetch messages or other error.`);
+                    totalSkippedChannels++;
+                    break; // Skip this channel if fetching fails
                 }
 
                 if (messages.size === 0) {
+                    if (debugMode) console.log(`[DEBUG] No more messages in channel "${channel.name}".`);
                     break;
                 }
 
+                totalFetchedMessages += messages.size;
+
                 for (const [messageId, message] of messages) {
-                    // If the message is older than today, stop fetching further
+                    if (debugMode) {
+                        console.log(`[DEBUG] [${channel.name}] Message from ${message.author.username} at ${message.createdAt.toISOString()}`);
+                    }
+
                     if (message.createdAt < startOfToday) {
+                        if (debugMode) console.log(`[DEBUG] [${channel.name}] Reached message older than today, stopping fetch for this channel.`);
                         fetching = false;
                         break;
                     }
 
-                    // If it's a human user and not yet counted, add to the set
                     if (!message.author.bot && !activeUserSet.has(message.author.id)) {
+                        if (debugMode) console.log(`[DEBUG] Marking user "${message.author.username}" as active.`);
                         activeUserSet.add(message.author.id);
 
-                        // If we found all non-bot members, we can stop early
                         if (activeUserSet.size >= nonBotMembersCount) {
-                            console.log('All non-bot members accounted for during fetching.');
+                            if (debugMode) console.log(`[DEBUG] All non-bot members accounted for during fetching.`);
                             fetching = false;
                             break;
                         }
@@ -75,20 +90,27 @@ async function sendDailyActiveUsers(guild, backendUrl) {
             }
         }
 
-        console.log(`Active users counted: ${activeUserSet.size}`);
+        if (debugMode) {
+            console.log(`\n=== [DEBUG] Finished scanning ===`);
+            console.log(`[DEBUG] Total messages fetched: ${totalFetchedMessages}`);
+            console.log(`[DEBUG] Total channels skipped: ${totalSkippedChannels}`);
+            console.log(`[DEBUG] Total active users found: ${activeUserSet.size}`);
+        }
 
         const data = {
             date: now.toISOString().split('T')[0], // YYYY-MM-DD format
             activeUsers: activeUserSet.size,
         };
 
-        console.log(`Sending active user data for date: ${data.date}`);
+        if (debugMode) {
+            console.log(`\n[DEBUG] Sending active user data for date: ${data.date}`);
+        }
 
         const response = await axios.post(`${backendUrl}/general-stats/active-users`, data);
-        console.log('Daily active users sent successfully:', response.data);
+        console.log('[INFO] Daily active users sent successfully:', response.data);
 
     } catch (error) {
-        console.error('Error sending daily active users:', error);
+        console.error('[ERROR] Error sending daily active users:', error);
     }
 }
 
