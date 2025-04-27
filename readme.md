@@ -176,15 +176,18 @@ backend/
 
 ### Backend API Endpoints
 
-| Endpoint                       | Method | Description                              |
-|--------------------------------|--------|------------------------------------------|
-| `/user-stats/add`              | POST   | Adds or updates user statistics.         |
-| `/user-stats/process-messages` | POST   | Processes bulk user messages.            |
-| `/user-stats/delete-user/:id`  | DELETE | Deletes all data for a specific user.    |
-| `/user-consent`                | POST   | Creates or updates user consent.         |
-| `/user-consent/:userId`        | GET    | Retrieves user consent status.           |
-| `/general-stats/add`           | POST   | Adds or updates general statistics.      |
-| `/general-stats/active-users`  | GET    | Fetches daily active user stats.         |
+| Endpoint                       | Method | Description                                             |
+|--------------------------------|--------|---------------------------------------------------------|
+| `/user-stats/add`              | POST   | Adds or updates user statistics.                        |
+| `/user-stats/process-messages` | POST   | Processes bulk user messages.                           |
+| `/user-stats/delete-user/:id`  | DELETE | Deletes all data for a specific user.                   |
+| `/user-stats/stats`            | GET    | Fetches all data by given range for a specific user.    |
+| `/user-stats/top-channel`      | GET    | Fetches user specific top channels and messagecount     |
+| `/user-consent`                | POST   | Creates or updates user consent.                        |
+| `/user-consent/:userId`        | GET    | Retrieves user consent status.                          |
+| `/general-stats/add`           | POST   | Adds or updates general statistics.                     |
+| `/general-stats/active-users`  | GET    | Fetches daily active user stats.                        |
+| `/general-stats/active-users`  | POST   | Saves daily active user count.                          |
 
 ---
 
