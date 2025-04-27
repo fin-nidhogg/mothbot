@@ -1,5 +1,6 @@
 const axios = require('../utils/axiosInstance');
 const config = require('../config');
+const { DateTime } = require('luxon');
 
 /**
  * Calculates and sends the number of active users for the current day to the backend.
@@ -18,8 +19,9 @@ async function sendDailyActiveUsers(guild, backendUrl, debugMode = false) {
         await guild.members.fetch();
 
         const now = new Date();
-        const startOfToday = new Date();
-        startOfToday.setHours(0, 0, 0, 0);
+
+        // Get today's start in Finnish time
+        const startOfToday = DateTime.now().setZone(`${config.timeZone}`).startOf('day').toUTC().toJSDate();
 
         if (debugMode) {
             console.log(`\n=== [DEBUG] Starting daily active user calculation ===`);
