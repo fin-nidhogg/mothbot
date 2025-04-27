@@ -3,6 +3,7 @@
     "@types/node": "^22.14.0"
   },
   "dependencies": {
+    "luxon": "^3.6.1",
     "node-cron": "^3.0.3"
   }
 }

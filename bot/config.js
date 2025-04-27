@@ -1,3 +1,4 @@
+const { time } = require('console');
 const dotenv = require('dotenv');
 const path = require('path');
 
@@ -19,4 +20,5 @@ module.exports = {
     botSecret: process.env.BOT_SECRET,
     githubToken: process.env.GITHUB_TOKEN,
     githubRepo: process.env.GITHUB_REPO,
+    timeZone: process.env.TIME_ZONE || 'Europe/Helsinki',
 };
