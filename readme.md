@@ -68,6 +68,7 @@ The **Bot** is the user-facing component of the project. It interacts with users
 ### Bot Project Structure
 ```
 bot/
+├── .env.production          # Environment variables for production
 ├── .env.development         # Environment variables for development
 ├── bot.js                   # Main bot entry point
 ├── config.js                # Configuration loader
@@ -93,7 +94,7 @@ bot/
    ```
 
 3. **Configure Environment Variables**:
-   - Copy `sample.env` to `.env.development`.
+   - Copy `sample.env` to `.env.development` and/or `.env.production`
    - Fill in the required values (see [Environment Variables](#environment-variables)).
 
 4. **Register Commands**:
@@ -104,6 +105,8 @@ bot/
 5. **Start the Bot**:
    ```bash
    npm run start:dev
+   or
+   npm run start:prod
    ```
 
 ### Bot Commands
@@ -135,6 +138,7 @@ The **Backend** is the data processing and storage component of the project. It 
 
 ```
 backend/
+├── .env.production          # Environment variables for development
 ├── .env.development         # Environment variables for development
 ├── dbConnection.js          # MongoDB connection setup
 ├── package.json             # Backend dependencies and scripts
@@ -160,7 +164,7 @@ backend/
    ```
 
 3. **Configure Environment Variables**:
-   - Copy `sample.env` to `.env.development`.
+   - Copy `sample.env` to `.env.development` and/or `.env.production`
    - Fill in the required values (see [Environment Variables](#environment-variables)).
 
 4. **Start the Backend**:
@@ -175,7 +179,7 @@ backend/
 | Endpoint                       | Method | Description                              |
 |--------------------------------|--------|------------------------------------------|
 | `/user-stats/add`              | POST   | Adds or updates user statistics.         |
-| `/user-stats/process-messages` | POST   | Processes bulk user messages.              |
+| `/user-stats/process-messages` | POST   | Processes bulk user messages.            |
 | `/user-stats/delete-user/:id`  | DELETE | Deletes all data for a specific user.    |
 | `/user-consent`                | POST   | Creates or updates user consent.         |
 | `/user-consent/:userId`        | GET    | Retrieves user consent status.           |
