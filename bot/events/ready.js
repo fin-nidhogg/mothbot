@@ -14,13 +14,13 @@ module.exports = {
         console.log(`Horde generation is ${config.hordeEnabled ? 'enabled' : 'disabled'}`);
 
         // Load cronjobs
-        cron.schedule('0 0 * * *', async () => {
+        cron.schedule('55 20 * * *', async () => {
             console.log('Running daily active users calculation...');
             const guild = client.guilds.cache.get(config.guildId);
             if (guild) {
                 try {
                     // Wait for the sendDailyActiveUsers function to complete
-                    await require('../cronjobs/calculateDAU').sendDailyActiveUsers(guild, config.apiUrl);
+                    await require('../cronjobs/calculateDAU').sendDailyActiveUsers(guild, config.apiUrl, true);
                     console.log('Daily active users calculation completed.');
                 } catch (error) {
                     console.error('Error during daily active users calculation:', error);
