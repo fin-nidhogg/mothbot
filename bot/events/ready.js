@@ -7,7 +7,7 @@ module.exports = {
     name: 'ready',
     once: true,
     execute(client) {
-        console.log(`Bot started in ${runmode} mode at:`new Date().toISOString());
+        console.log(`Bot started in ${runmode} mode at: ${new Date().toISOString()}`);
         console.log(`Ready! Logged in as ${client.user.tag}`);
         console.log(`Bot is using API: ${config.apiUrl}`);
         console.log(`Bot is running on ${client.guilds.cache.size} servers`);
