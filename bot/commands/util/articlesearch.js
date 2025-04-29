@@ -1,6 +1,7 @@
 const { SlashCommandBuilder, MessageFlags } = require('discord.js');
 const axios = require('axios');
 const cheerio = require('cheerio');
+const { logCommand } = require('../../logger.js');
 
 module.exports = {
     data: new SlashCommandBuilder()
