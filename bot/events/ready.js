@@ -1,5 +1,5 @@
-const config = require('../config');
 const cron = require('node-cron');
+const config = require('../config');
 const { sendDailyActiveUsers } = require('../cronjobs/calculateDAU');
 const runmode = process.env.NODE_ENV;
 
@@ -7,27 +7,45 @@ module.exports = {
     name: 'ready',
     once: true,
     execute(client) {
-        console.log(`Bot started in ${runmode} mode at: ${new Date().toISOString()}`);
-        console.log(`Ready! Logged in as ${client.user.tag}`);
-        console.log(`Bot is using API: ${config.apiUrl}`);
-        console.log(`Bot is running on ${client.guilds.cache.size} servers`);
+        const localTime = new Date().toLocaleString('fi-FI', { timeZone: config.timeZone });
+        const utcTime = new Date().toISOString();
 
-        cron.schedule('55 20 * * *', async () => {
-            console.log('[CRON] Triggered at:', new Date().toISOString());
-            console.log('Looking for guild ID:', config.guildId);
+        console.log('\n==================== BOT STATUS ====================');
+        console.log(`🟢 Bot started in ${runmode} mode`);
+        console.log(`👤 Logged in as:        ${client.user.tag}`);
+        console.log(`🌍 Time (local):        ${localTime}`);
+        console.log(`🌐 Time (UTC):          ${utcTime}`);
+        console.log(`🛠️  API in use:         ${config.apiUrl}`);
+        console.log(`📡 Connected servers:   ${client.guilds.cache.size}`);
+        console.log('====================================================\n');
+
+        cron.schedule('55 23 * * *', async () => {
+            const now = new Date();
+            const localNow = now.toLocaleString('fi-FI', { timeZone: config.timeZone });
+
+            console.log('\n========= [CRON] Daily Active User Trigger =========');
+            console.log(`🕓 Trigger time (local): ${localNow}`);
+            console.log(`🕓 Trigger time (UTC):   ${now.toISOString()}`);
+            console.log(`🔍 Looking for guild ID: ${config.guildId}`);
 
             const guild = client.guilds.cache.get(config.guildId);
-            if (guild) {
-                try {
-                    await sendDailyActiveUsers(guild, config.apiUrl, true);
-                    console.log('Daily active users calculation completed.');
-                } catch (error) {
-                    console.error('Error during daily active users calculation:', error);
-                }
-            } else {
-                console.error('Guild not found. Available guilds:');
-                console.log(client.guilds.cache.map(g => `${g.name} (${g.id})`).join(', '));
+
+            if (!guild) {
+                console.error('❌ Guild not found. Available guilds:');
+                console.log(client.guilds.cache.map(g => `- ${g.name} (${g.id})`).join('\n'));
+                return;
             }
+
+            try {
+                await sendDailyActiveUsers(guild, config.apiUrl, true);
+                console.log('✅ Daily active users report sent successfully.');
+            } catch (error) {
+                console.error('❌ Error during daily active users calculation:\n', error);
+            }
+
+            console.log('====================================================\n');
+        }, {
+            timezone: config.timeZone
         });
     },
 };
