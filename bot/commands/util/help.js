@@ -10,7 +10,7 @@ module.exports = {
         logCommand('help', interaction.user.username);
         const botname = interaction.client.user.username;
         const message =
-            `Hello! I am the ${config.botname}! As your humble servant, I am here to assist you with all your temple needs!
+            `Hello! I am the Mothbot! As your humble servant, I am here to assist you with all your temple needs!
     
     Heres some links to start with:
     
