@@ -48,7 +48,7 @@ exports.getDailyActiveUsers = async (req, res) => {
             {
                 $group: {
                     _id: null, // No grouping key, we want a single result
-                    totalActiveUsers: { $sum: "$activeUsers" }, // Sum the activeUsers field
+                    totalActiveUsers: { $max: "$activeUsers" }, // Sum the activeUsers field
                 },
             },
             {
