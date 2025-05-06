@@ -21,4 +21,5 @@ module.exports = {
     githubToken: process.env.GITHUB_TOKEN,
     githubRepo: process.env.GITHUB_REPO,
     timeZone: process.env.TIME_ZONE || 'Europe/Helsinki',
+    ollamaURL: process.env.OLLAMA_URL
 };

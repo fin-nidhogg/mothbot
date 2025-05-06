@@ -2,6 +2,7 @@ const { MessageFlags } = require('discord.js');
 const { postUserdata, postGeneralStats } = require('../utils/postStats');
 const getUserConsent = require('../utils/getUserConsent');
 const generateWithHorde = require('../utils/generateWithHorde');
+const generateWithOllama = require('../utils/generateWithOllama');
 const { logCommand } = require('../logger');
 const config = require('../config');
 
@@ -28,17 +29,17 @@ async function handleDirectMessage(message) {
 
         // Generate response using AI Horde
         try {
-            const replyMessage = await generateWithHorde(message.content);
+            const replyMessage = await generateWithOllama(message.content);
             clearInterval(typing); // Delete typing indicator when response is ready
             message.reply(replyMessage);
         } catch {
-            console.error("Error in AI Horde request");
+            console.error("Error in AI request");
             message.reply("Something went critically wrong 🤔");
         }
 
     } else {
         try {
-            console.log(`DM Received from ${message.author.tag}: Responding without AI Horde...`)
+            console.log(`DM Received from ${message.author.tag}: Responding without AI...`)
             await message.reply(`Ah, a mysterious DM appears...\nUnfortunately, I do not possess the means to converse here.\nAs the wise say, *'The stars only align when we gather together.'*\n\nThis message, however, has been recorded in the logs, as a reminder from the past to the future.\nBeware, for all messages may one day reveal their secrets.`);
         } catch (error) {
             console.error('Error sending DM reply:', error);
