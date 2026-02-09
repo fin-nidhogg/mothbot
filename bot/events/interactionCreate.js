@@ -140,23 +140,20 @@ async function handleAutocompleteInteraction(interaction) {
         }
 
         const guild = interaction.guild;
-        const members = await guild.members.fetch();
 
-        // Filter members by the focused option value and return the first 25 (the max Discord allows)
+        // 🔥 HOTFIX, replacing guild.members.fetch() so it wont timeout
+        const members = await guild.members.search({
+            query: focusedOption.value,
+            limit: 25,
+        });
+
         const choices = members.map(member => ({
-            name: member.displayName.length > 25 ? member.displayName.slice(0, 22) + "..." : member.displayName,
-            value: member.user.username,
+            name: member.displayName.length > 25
+                ? member.displayName.slice(0, 22) + "..."
+                : member.displayName,
+            value: member.user.username, // concider using member.id in future to avoid duplicate usernames
         }));
 
-        const filtered = choices.filter(choice =>
-            choice.name.toLowerCase().startsWith(focusedOption.value.toLowerCase())
-        );
-
-        const validChoices = filtered.slice(0, 25).map(choice => ({
-            name: choice.name.toString(),
-            value: choice.value.toString(),
-        }));
-
-        await interaction.respond(validChoices);
+        await interaction.respond(choices);
     }
 }
