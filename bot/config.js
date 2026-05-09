@@ -1,4 +1,3 @@
-const { time } = require('console');
 const dotenv = require('dotenv');
 const path = require('path');
 
@@ -21,5 +20,13 @@ module.exports = {
     githubToken: process.env.GITHUB_TOKEN,
     githubRepo: process.env.GITHUB_REPO,
     timeZone: process.env.TIME_ZONE || 'Europe/Helsinki',
-    ollamaURL: process.env.OLLAMA_URL
+    ollamaURL: process.env.OLLAMA_URL,
+    websiteMonitor: {
+        enabled: process.env.WEBSITE_MONITOR_ENABLED === 'true',
+        url: process.env.WEBSITE_MONITOR_URL,
+        channelId: process.env.WEBSITE_MONITOR_CHANNEL_ID,
+        name: process.env.WEBSITE_MONITOR_NAME || process.env.WEBSITE_MONITOR_URL,
+        intervalSeconds: Number(process.env.WEBSITE_MONITOR_INTERVAL_SECONDS) || 60,
+        timeoutMs: Number(process.env.WEBSITE_MONITOR_TIMEOUT_MS) || 10000,
+    },
 };
