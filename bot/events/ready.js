@@ -1,6 +1,7 @@
 const cron = require('node-cron');
 const config = require('../config');
 const { sendDailyActiveUsers } = require('../cronjobs/calculateDAU');
+const { startWebsiteMonitor } = require('../cronjobs/monitorWebsite');
 const runmode = process.env.NODE_ENV;
 
 module.exports = {
@@ -18,6 +19,8 @@ module.exports = {
         console.log(`🛠️  API in use:         ${config.apiUrl}`);
         console.log(`📡 Connected servers:   ${client.guilds.cache.size}`);
         console.log('====================================================\n');
+
+        startWebsiteMonitor(client, config.websiteMonitor);
 
         cron.schedule('55 23 * * *', async () => {
             const now = new Date();

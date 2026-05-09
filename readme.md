@@ -63,6 +63,7 @@ The **Bot** is the user-facing component of the project. It interacts with users
 - **AI Horde Integration**: Generates AI-based responses for user queries.
 - **Feedback System**: Allows users to submit feedback or bug reports directly to GitHub.
 - **Scheduled Tasks**: Runs periodic tasks such as daily statistics updates.
+- **Website Monitoring**: Watches a configured website and reports downtime/recovery to a Discord channel without repeated spam.
 - **Logging**: Logs all interactions for debugging and auditing purposes.
 
 ### Bot Project Structure
@@ -206,6 +207,12 @@ backend/
 | `GITHUB_TOKEN`        | GitHub token for issue creation.                 |
 | `GITHUB_REPO`         | GitHub repository for issue tracking.            |
 | `TIME_ZONE`           | Server timezone (e.g., `Europe/Helsinki`).       |
+| `WEBSITE_MONITOR_ENABLED` | Enable/disable website monitoring (`true/false`). |
+| `WEBSITE_MONITOR_URL` | Website URL to monitor.                          |
+| `WEBSITE_MONITOR_NAME` | Display name for monitor alerts.                |
+| `WEBSITE_MONITOR_CHANNEL_ID` | Discord channel ID for monitor alerts.    |
+| `WEBSITE_MONITOR_INTERVAL_SECONDS` | Check interval in seconds, minimum 10. |
+| `WEBSITE_MONITOR_TIMEOUT_MS` | Request timeout in milliseconds, minimum 1000. |
 
 ### Backend `.env` File
 | Variable              | Description                                      |
