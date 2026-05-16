@@ -213,6 +213,7 @@ backend/
 | `WEBSITE_MONITOR_CHANNEL_ID` | Discord channel ID for monitor alerts.    |
 | `WEBSITE_MONITOR_INTERVAL_SECONDS` | Check interval in seconds, minimum 10. |
 | `WEBSITE_MONITOR_TIMEOUT_MS` | Request timeout in milliseconds, minimum 1000. |
+| `WEBSITE_MONITOR_FAILURE_THRESHOLD` | Consecutive failed checks required before sending a down alert, minimum 1. |
 
 ### Backend `.env` File
 | Variable              | Description                                      |
