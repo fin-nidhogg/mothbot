@@ -28,5 +28,6 @@ module.exports = {
         name: process.env.WEBSITE_MONITOR_NAME || process.env.WEBSITE_MONITOR_URL,
         intervalSeconds: Number(process.env.WEBSITE_MONITOR_INTERVAL_SECONDS) || 60,
         timeoutMs: Number(process.env.WEBSITE_MONITOR_TIMEOUT_MS) || 10000,
+        failureThreshold: Number(process.env.WEBSITE_MONITOR_FAILURE_THRESHOLD) || 1,
     },
 };

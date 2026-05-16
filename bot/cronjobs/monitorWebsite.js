@@ -47,6 +47,7 @@ function createDownEmbed(monitor, result) {
             { name: 'Error', value: `${details.title}: ${details.description}` },
             { name: 'Response time', value: formatDuration(result.durationMs), inline: true },
             { name: 'Check interval', value: `${monitor.intervalSeconds} s`, inline: true },
+            { name: 'Failed checks', value: `${result.failureCount}/${monitor.failureThreshold}`, inline: true },
         )
         .setTimestamp();
 }
@@ -139,6 +140,10 @@ function validateMonitorConfig(monitor) {
         return 'WEBSITE_MONITOR_TIMEOUT_MS must be at least 1000';
     }
 
+    if (!Number.isInteger(monitor.failureThreshold) || monitor.failureThreshold < 1) {
+        return 'WEBSITE_MONITOR_FAILURE_THRESHOLD must be an integer of at least 1';
+    }
+
     return null;
 }
 
@@ -154,6 +159,7 @@ function startWebsiteMonitor(client, monitor) {
     }
 
     let lastState = 'unknown';
+    let failureCount = 0;
     let inFlight = false;
 
     const runCheck = async () => {
@@ -167,17 +173,30 @@ function startWebsiteMonitor(client, monitor) {
         try {
             const result = await checkWebsite(monitor);
 
-            if (!result.ok && lastState !== 'down') {
-                await sendMonitorMessage(client, monitor.channelId, createDownEmbed(monitor, result));
-                console.warn(`[WebsiteMonitor] ${monitor.url} is down.`);
+            if (!result.ok) {
+                failureCount += 1;
+
+                if (failureCount >= monitor.failureThreshold && lastState !== 'down') {
+                    await sendMonitorMessage(
+                        client,
+                        monitor.channelId,
+                        createDownEmbed(monitor, { ...result, failureCount }),
+                    );
+                    console.warn(`[WebsiteMonitor] ${monitor.url} is down after ${failureCount} failed checks.`);
+                    lastState = 'down';
+                }
+
+                return;
             }
 
-            if (result.ok && lastState === 'down') {
+            failureCount = 0;
+
+            if (lastState === 'down') {
                 await sendMonitorMessage(client, monitor.channelId, createUpEmbed(monitor, result));
                 console.log(`[WebsiteMonitor] ${monitor.url} recovered.`);
             }
 
-            lastState = result.ok ? 'up' : 'down';
+            lastState = 'up';
         } catch (error) {
             console.error('[WebsiteMonitor] Failed to process monitor check:', error);
         } finally {
