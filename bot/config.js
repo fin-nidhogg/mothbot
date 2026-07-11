@@ -30,4 +30,9 @@ module.exports = {
         timeoutMs: Number(process.env.WEBSITE_MONITOR_TIMEOUT_MS) || 10000,
         failureThreshold: Number(process.env.WEBSITE_MONITOR_FAILURE_THRESHOLD) || 1,
     },
+    scheduledMessages: {
+        enabled: process.env.SCHEDULED_MESSAGES_ENABLED !== 'false',
+        intervalSeconds: Math.max(Number(process.env.SCHEDULED_MESSAGES_INTERVAL_SECONDS) || 15, 5),
+        batchSize: Math.max(Number(process.env.SCHEDULED_MESSAGES_BATCH_SIZE) || 10, 1),
+    },
 };

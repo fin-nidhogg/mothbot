@@ -270,3 +270,42 @@ Contributions are welcome! Please follow these steps:
 ## License
 
 This project is licensed under the ISC License. See the `LICENSE` file for details.
+
+
+## Scheduled Messages Admin Panel
+
+The scheduled-message GUI is available in both development and production at `/admin/scheduled-messages/`.
+Unauthenticated visitors are redirected to `/admin/login`.
+
+Create or update an admin user interactively from `backend/`:
+
+    npm run admin:create -- username "Display Name"
+
+For production:
+
+    npm run admin:create:prod -- username "Display Name"
+
+The command asks for the password without echoing it. Passwords must contain at least 12 characters.
+Updating an existing username changes its password and revokes all active sessions.
+
+Production requires HTTPS because the session cookie is Secure, HttpOnly, and SameSite=Strict.
+When Express runs behind one trusted HTTPS reverse proxy, set `TRUST_PROXY=1`.
+
+Optional backend environment settings:
+
+    ADMIN_SESSION_HOURS=12
+    TRUST_PROXY=1
+
+The GUI uses server-side MongoDB sessions and CSRF protection. Bot-to-API traffic continues to use
+the separate HMAC-protected `/scheduled-messages` API. Never expose `SECRET_KEY`, `BOT_SECRET`, an
+admin password, or a session token in browser configuration.
+
+Disable an administrator and revoke all active sessions:
+
+    npm run admin:disable -- username
+
+For production:
+
+    npm run admin:disable:prod -- username
+
+Running the create command again reactivates a disabled account and sets a new password.

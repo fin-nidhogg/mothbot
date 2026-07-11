@@ -2,28 +2,24 @@ const crypto = require('crypto');
 const SECRET_KEY = process.env.SECRET_KEY;
 
 function verifySignature(req, res, next) {
-
-    const signature = req.headers['authorization'];
-
-    // Check if the signature is present in the request headers
-    if (!signature) {
-        return res.status(401).send('Auth key missing');
+    const signature = req.headers.authorization;
+    if (!SECRET_KEY) {
+        console.error('Backend: SECRET_KEY is not configured');
+        return res.status(500).json({ error: 'API authentication is not configured.' });
     }
+    if (!signature) return res.status(401).json({ error: 'Auth key missing.' });
+    if (!/^[a-f0-9]{64}$/i.test(signature)) return res.status(403).json({ error: 'Auth key mismatch.' });
 
-    const payload = JSON.stringify(req.body || {});
-    const expectedSignature = crypto
-        .createHmac('sha256', SECRET_KEY)
-        .update(payload)
-        .digest('hex');
+    // Body-bearing requests are signed from the exact UTF-8 bytes sent over HTTP.
+    // Requests without a body retain the existing "{}" signing convention.
+    const payload = req.rawBody?.length ? req.rawBody : JSON.stringify(req.body || {});
+    const expected = crypto.createHmac('sha256', SECRET_KEY).update(payload).digest();
+    const received = Buffer.from(signature, 'hex');
 
-    // Compare the received signature with the expected signature
-    if (signature !== expectedSignature) {
-        return res.status(403).send('Auth key mismatch');
+    if (received.length !== expected.length || !crypto.timingSafeEqual(received, expected)) {
+        return res.status(403).json({ error: 'Auth key mismatch.' });
     }
-
-    console.log('Backend: Signature verified successfully');
-    next(); // Proceed to the next middleware or route handler
-
+    next();
 }
 
 module.exports = verifySignature;
