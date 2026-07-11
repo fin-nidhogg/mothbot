@@ -1,3 +1,4 @@
 node_modules/
 .env*
 commands.log
+/scheduled-messages-integration.private.md

@@ -2,6 +2,7 @@ const cron = require('node-cron');
 const config = require('../config');
 const { sendDailyActiveUsers } = require('../cronjobs/calculateDAU');
 const { startWebsiteMonitor } = require('../cronjobs/monitorWebsite');
+const { startScheduledMessageWorker } = require('../cronjobs/sendScheduledMessages');
 const runmode = process.env.NODE_ENV;
 
 module.exports = {
@@ -21,6 +22,7 @@ module.exports = {
         console.log('====================================================\n');
 
         startWebsiteMonitor(client, config.websiteMonitor);
+        startScheduledMessageWorker(client, { ...config.scheduledMessages, apiUrl: config.apiUrl });
 
         cron.schedule('55 23 * * *', async () => {
             const now = new Date();

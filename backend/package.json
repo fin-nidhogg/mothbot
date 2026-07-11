@@ -6,7 +6,11 @@
     "start:dev-win": "cross-env NODE_ENV=development node server.js",
     "start:prod-win": "cross-env NODE_ENV=production node server.js",
     "start:dev": "NODE_ENV=development node server.js",
-    "start:prod": "NODE_ENV=production node server.js"
+    "start:prod": "NODE_ENV=production node server.js",
+    "admin:create": "NODE_ENV=development node scripts/createAdminUser.js",
+    "admin:create:prod": "NODE_ENV=production node scripts/createAdminUser.js",
+    "admin:disable": "NODE_ENV=development ADMIN_ACTION=disable node scripts/createAdminUser.js",
+    "admin:disable:prod": "NODE_ENV=production ADMIN_ACTION=disable node scripts/createAdminUser.js"
   },
   "keywords": [],
   "author": "",
