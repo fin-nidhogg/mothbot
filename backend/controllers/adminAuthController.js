@@ -6,6 +6,7 @@ const dummyPasswordHash = hashPassword('not-a-real-password-value');
 const { COOKIE_NAME, tokenHash } = require('../middleware/adminAuth');
 
 const attempts = new Map();
+const passwordChangeAttempts = new Map();
 const WINDOW_MS = 15 * 60 * 1000;
 const MAX_ATTEMPTS = 5;
 
@@ -28,6 +29,23 @@ function failed(ip) {
     const record = attempts.get(ip) || { count: 0, startedAt: Date.now() };
     record.count += 1;
     attempts.set(ip, record);
+}
+function passwordChangeKey(req) {
+    return `${req.adminUser._id}:${clientIp(req)}`;
+}
+function blockedAttempt(store, key) {
+    const now = Date.now();
+    const record = store.get(key);
+    if (!record || now - record.startedAt > WINDOW_MS) {
+        store.set(key, { count: 0, startedAt: now });
+        return false;
+    }
+    return record.count >= MAX_ATTEMPTS;
+}
+function recordFailedAttempt(store, key) {
+    const record = store.get(key) || { count: 0, startedAt: Date.now() };
+    record.count += 1;
+    store.set(key, record);
 }
 function cookieOptions(expiresAt) {
     return {
@@ -81,6 +99,45 @@ exports.me = (req, res) => {
         csrfToken: req.adminSession.csrfToken,
         expiresAt: req.adminSession.expiresAt,
     });
+};
+exports.changePassword = async (req, res) => {
+    const key = passwordChangeKey(req);
+    if (blockedAttempt(passwordChangeAttempts, key)) {
+        return res.status(429).json({ error: 'Too many password attempts. Try again later.' });
+    }
+
+    const body = req.body || {};
+    const currentPassword = typeof body.currentPassword === 'string' ? body.currentPassword : '';
+    const newPassword = typeof body.newPassword === 'string' ? body.newPassword : '';
+    const newPasswordConfirmation = typeof body.newPasswordConfirmation === 'string' ? body.newPasswordConfirmation : '';
+    if (!currentPassword || currentPassword.length > 256) {
+        recordFailedAttempt(passwordChangeAttempts, key);
+        return res.status(400).json({ error: 'Current password is required.' });
+    }
+    if (newPassword !== newPasswordConfirmation) {
+        return res.status(400).json({ error: 'New passwords do not match.' });
+    }
+    if (currentPassword === newPassword) {
+        return res.status(400).json({ error: 'New password must be different from the current password.' });
+    }
+    try {
+        const currentPasswordMatches = await verifyPassword(currentPassword, req.adminUser.passwordHash);
+        if (!currentPasswordMatches) {
+            recordFailedAttempt(passwordChangeAttempts, key);
+            return res.status(400).json({ error: 'Current password is incorrect.' });
+        }
+        req.adminUser.passwordHash = await hashPassword(newPassword);
+        await req.adminUser.save();
+        await AdminSession.deleteMany({ userId: req.adminUser._id, _id: { $ne: req.adminSession._id } });
+        passwordChangeAttempts.delete(key);
+        res.json({ message: 'Password changed successfully. Other sessions have been signed out.' });
+    } catch (error) {
+        if (error.message === 'Password must be at least 12 characters.' || error.message === 'Password is too long.') {
+            return res.status(400).json({ error: error.message });
+        }
+        console.error('Admin password change failed:', error);
+        res.status(500).json({ error: 'Could not change password.' });
+    }
 };
 exports.logout = async (req, res) => {
     try {
