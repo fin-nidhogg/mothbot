@@ -12,9 +12,26 @@
 * {
     box-sizing: border-box;
 }
+html {
+    min-width: 0;
+    min-height: 100%;
+    background: var(--bg);
+    width: 100%;
+    max-width: 100%;
+    overflow-x: hidden;
+    overscroll-behavior-x: none;
+}
 body {
+    width: 100%;
+    min-width: 0;
+    max-width: 100%;
+    overflow-x: hidden;
+    overscroll-behavior-x: none;
+    touch-action: pan-y pinch-zoom;
+    min-height: 100vh;
+    min-height: 100svh;
     margin: 0;
-    background: linear-gradient(145deg, #15182a 0, var(--bg) 35%);
+    background: linear-gradient(145deg, #15182a 0, var(--bg) 35%) fixed;
     color: var(--text);
     font:
         14px Inter,
@@ -23,6 +40,8 @@ body {
         sans-serif;
 }
 .shell {
+    width: 100%;
+    min-width: 0;
     max-width: 1180px;
     margin: auto;
     padding: 24px 20px 40px;
@@ -70,6 +89,7 @@ p {
     align-items: start;
 }
 .panel {
+    min-width: 0;
     background: #151820f2;
     border: 1px solid var(--line);
     border-radius: 14px;
@@ -120,6 +140,9 @@ legend {
     margin-bottom: 7px;
 }
 .segments {
+    width: 100%;
+    min-width: 0;
+    max-width: 100%;
     display: grid;
     grid-template-columns: repeat(3, 1fr);
     padding: 3px;
@@ -174,6 +197,23 @@ textarea:focus,
 select:focus {
     border-color: #6975ff;
     box-shadow: 0 0 0 3px #5865f21f;
+}
+form,
+fieldset,
+label,
+.fields,
+.fields > *,
+.color-control,
+.interval-control,
+.recurrence-settings,
+.message-editor-wrap {
+    min-width: 0;
+}
+input,
+textarea,
+select {
+    min-width: 0;
+    max-width: 100%;
 }
 textarea {
     resize: vertical;
@@ -289,6 +329,8 @@ summary span {
     border-top: 1px solid var(--line);
 }
 .notice {
+    min-width: 0;
+    overflow-wrap: anywhere;
     font-size: 12px;
     min-height: 17px;
     color: #aab1ff;
@@ -336,17 +378,25 @@ button {
 }
 .item {
     display: grid;
-    grid-template-columns: 1fr auto;
+    grid-template-columns: minmax(0, 1fr) auto;
     gap: 8px;
     border: 1px solid var(--line);
     border-radius: 10px;
     padding: 11px;
     background: var(--panel2);
 }
+.item > div:first-child {
+    min-width: 0;
+}
 .item-title {
     display: flex;
     align-items: center;
+    flex-wrap: wrap;
     gap: 7px;
+}
+.item-title strong,
+.meta {
+    overflow-wrap: anywhere;
 }
 .meta {
     color: var(--muted);
@@ -380,7 +430,7 @@ button {
         grid-template-columns: 1fr;
     }
 }
-@media (max-width: 480px) {
+@media (max-width: 720px) {
     header {
         align-items: flex-start;
         gap: 14px;
@@ -388,6 +438,34 @@ button {
     }
     .admin-user {
         width: 100%;
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+        gap: 8px;
+    }
+    .user-name-button,
+    .admin-user .ghost {
+        width: 100%;
+        min-width: 0;
+        margin: 0;
+        padding: 9px 12px;
+        border: 1px solid var(--line);
+        border-radius: 9px;
+        background: #242936;
+        box-shadow: none;
+        backdrop-filter: none;
+        -webkit-backdrop-filter: none;
+        color: #d9dce4;
+        font-size: 12px;
+        text-shadow: none;
+    }
+    .user-name-button::before {
+        display: none;
+    }
+    .account-button-label {
+        display: inline;
+    }
+    .account-user-name {
+        display: none;
     }
     .shell {
         padding: 15px 10px;
@@ -400,6 +478,12 @@ button {
     }
     .actions {
         flex-direction: column-reverse;
+    }
+    .item {
+        grid-template-columns: minmax(0, 1fr);
+    }
+    .item-actions {
+        justify-content: flex-end;
     }
 }
 .preview {
@@ -437,6 +521,14 @@ button {
     color: transparent;
 }
 
+.composer form,
+.form-section,
+.form-section > *,
+.block {
+    width: 100%;
+    min-width: 0;
+    max-width: 100%;
+}
 .form-section {
     padding: 16px 0;
     border-bottom: 1px solid var(--line);
@@ -570,8 +662,10 @@ select:disabled {
 }
 .view {
     width: 100%;
+    min-width: 0;
 }
 .composer {
+    width: 100%;
     max-width: 780px;
     margin: 0 auto;
 }
@@ -634,6 +728,32 @@ select:disabled {
     height: 28px;
     border-radius: 2px;
     background: var(--accent);
+}
+@media (pointer: coarse) {
+    html {
+        width: 100%;
+        height: 100%;
+        overflow: hidden;
+        overscroll-behavior: none;
+    }
+    body {
+        position: fixed;
+        inset: 0;
+        width: auto;
+        max-width: none;
+        height: auto;
+        min-height: 0;
+        overflow-x: hidden !important;
+        overflow-y: auto;
+        overscroll-behavior: none;
+        touch-action: pan-y pinch-zoom;
+        -webkit-overflow-scrolling: touch;
+    }
+    .status-tabs {
+        flex-wrap: wrap;
+        overflow-x: hidden;
+        touch-action: pan-y pinch-zoom;
+    }
 }
 @media (max-width: 720px) {
     .queue .items {
@@ -818,7 +938,7 @@ select:disabled {
 }
 .weekday-picker {
     display: grid;
-    grid-template-columns: repeat(7, 1fr);
+    grid-template-columns: repeat(7, minmax(0, 1fr));
     gap: 4px;
     margin-top: 6px;
 }
@@ -944,8 +1064,19 @@ select:disabled {
 }
 .admin-user {
     display: flex;
+    min-width: 0;
     align-items: center;
     gap: 8px;
+}
+.account-button-label {
+    display: none;
+}
+.account-user-name {
+    display: block;
+    max-width: 20rem;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
 }
 .user-name-button {
     position: relative;
