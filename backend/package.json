@@ -10,7 +10,8 @@
     "admin:create": "NODE_ENV=development node scripts/createAdminUser.js",
     "admin:create:prod": "NODE_ENV=production node scripts/createAdminUser.js",
     "admin:disable": "NODE_ENV=development ADMIN_ACTION=disable node scripts/createAdminUser.js",
-    "admin:disable:prod": "NODE_ENV=production ADMIN_ACTION=disable node scripts/createAdminUser.js"
+    "admin:disable:prod": "NODE_ENV=production ADMIN_ACTION=disable node scripts/createAdminUser.js",
+    "test": "node --test"
   },
   "keywords": [],
   "author": "",

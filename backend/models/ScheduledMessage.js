@@ -1,21 +1,5 @@
 const mongoose = require('mongoose');
-
-const embedField = new mongoose.Schema({
-    name: { type: String, required: true, maxlength: 256 },
-    value: { type: String, required: true, maxlength: 1024 },
-    inline: { type: Boolean, default: false },
-}, { _id: false });
-
-const embed = new mongoose.Schema({
-    title: { type: String, maxlength: 256 },
-    description: { type: String, maxlength: 4096 },
-    url: String,
-    color: { type: Number, min: 0, max: 0xFFFFFF },
-    thumbnailUrl: String,
-    imageUrl: String,
-    footer: { type: String, maxlength: 2048 },
-    fields: { type: [embedField], default: undefined },
-}, { _id: false });
+const { embedSchema } = require('./messageContent');
 
 const recurrence = new mongoose.Schema({
     frequency: { type: String, enum: ['weekly', 'monthly'], required: true },
@@ -31,7 +15,10 @@ const schema = new mongoose.Schema({
     guildId: { type: String, required: true, trim: true },
     channelId: { type: String, required: true, trim: true },
     content: { type: String, default: '', maxlength: 2000 },
-    embed: { type: embed, default: undefined },
+    embed: { type: embedSchema, default: undefined },
+    sourceTemplateId: { type: mongoose.Schema.Types.ObjectId, ref: 'MessageTemplate' },
+    sourceTemplateName: { type: String, trim: true, maxlength: 120 },
+    sourceTemplateVersion: { type: Number, min: 0 },
     scheduledFor: { type: Date, required: true },
     recurrence: { type: recurrence, default: undefined },
     status: {

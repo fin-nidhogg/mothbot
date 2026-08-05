@@ -277,6 +277,8 @@ This project is licensed under the ISC License. See the `LICENSE` file for detai
 The scheduled-message GUI is available in both development and production at `/admin/scheduled-messages/`.
 Unauthenticated visitors are redirected to `/admin/login`.
 
+The Templates view manages reusable, server-specific message content. An optional default channel can be stored with a template. Using a template copies its content into a new scheduled message; later template edits never change existing schedules. Templates are archived instead of deleted, and concurrent edits are protected with document versions. Template changes and usage are recorded in the `adminauditlogs` MongoDB collection.
+
 Create or update an admin user interactively from `backend/`:
 
     npm run admin:create -- username "Display Name"

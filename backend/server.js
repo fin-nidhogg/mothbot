@@ -47,6 +47,7 @@ const generalStatsRoutes = require('./routes/generalStatsRoutes');
 const scheduledMessageRoutes = require('./routes/scheduledMessageRoutes');
 const adminAuthRoutes = require('./routes/adminAuthRoutes');
 const adminScheduledMessageRoutes = require('./routes/adminScheduledMessageRoutes');
+const adminMessageTemplateRoutes = require('./routes/adminMessageTemplateRoutes');
 const {
     loadAdminSession,
     requireAdmin,
@@ -63,6 +64,9 @@ app.use('/scheduled-messages', scheduledMessageRoutes);
 const adminFiles = {
     'styles.css': 'styles.css',
     'app.js': 'app.js',
+    'templates.js': 'templates.js',
+    'embed-enhancements.js': 'embed-enhancements.js',
+    'formatting.js': 'formatting.js',
     'login.css': 'login.css',
     'login.js': 'login.js',
 };
@@ -76,6 +80,7 @@ app.get('/admin-assets/:file', (req, res, next) => {
 app.use('/admin-api', (req, res, next) => { res.set('Cache-Control', 'no-store'); next(); });
 app.use('/admin-api/auth', loadAdminSession, adminAuthRoutes);
 app.use('/admin-api/scheduled-messages', loadAdminSession, requireAdmin, requireCsrf, adminScheduledMessageRoutes);
+app.use('/admin-api/message-templates', loadAdminSession, requireAdmin, requireCsrf, adminMessageTemplateRoutes);
 
 app.get('/admin/login', loadAdminSession, redirectAuthenticated, (req, res) => {
     res.set('Cache-Control', 'no-store');

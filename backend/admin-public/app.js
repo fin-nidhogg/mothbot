@@ -1,5 +1,6 @@
 const byId = (id) => document.getElementById(id);
 const api = "/admin-api/scheduled-messages";
+const templateApi = "/admin-api/message-templates";
 let csrfToken = null;
 let messages = [];
 let guilds = [];
@@ -18,14 +19,21 @@ function toLocalInput(value) {
     const date = new Date(value);
     return new Date(date.getTime() - date.getTimezoneOffset() * 60000).toISOString().slice(0, 16);
 }
+function embedTextValue(id) {
+    return byId(id).value.trim();
+}
 function embedData() {
     if (messageType() === "text") return null;
     return {
-        title: byId("embedTitle").value.trim(),
-        description: byId("description").value.trim(),
+        authorName: embedTextValue("authorName"),
+        authorIconUrl: byId("authorIconUrl").value.trim(),
+        authorUrl: byId("authorUrl").value.trim(),
+        title: embedTextValue("embedTitle"),
+        description: embedTextValue("description"),
         imageUrl: byId("imageUrl").value.trim(),
         thumbnailUrl: byId("thumbnailUrl").value.trim(),
-        footer: byId("footer").value.trim(),
+        footer: embedTextValue("footer"),
+        footerIconUrl: byId("footerIconUrl").value.trim(),
         color: Number.parseInt(byId("colorHex").value.slice(1), 16),
     };
 }
@@ -38,6 +46,8 @@ function formData() {
         scheduledFor: new Date(byId("scheduledFor").value).toISOString(),
         embed: embedData(),
         recurrence: recurrenceData(),
+        sourceTemplateId: byId("sourceTemplateId").value || undefined,
+        sourceTemplateVersion: byId("sourceTemplateVersion").value === "" ? undefined : Number(byId("sourceTemplateVersion").value),
     };
 }
 function setNotice(message, error = false) {
@@ -49,13 +59,13 @@ function setColor(value) {
     if (!/^#[0-9A-F]{6}$/.test(normalized)) return;
     byId("color").value = normalized;
     byId("colorHex").value = normalized;
-    document.documentElement.style.setProperty("--accent", normalized);
     preview();
 }
 function updateType() {
     const selected = messageType();
-    byId("textFields").hidden = false;
+    byId("textFields").hidden = selected === "embed";
     byId("textRequired").hidden = selected === "embed";
+    byId("messagePlacementHelp").hidden = selected !== "both";
     byId("embedFields").hidden = selected === "text";
     byId("content").required = false;
     byId("description").required = selected !== "text";
@@ -166,11 +176,16 @@ function edit(id) {
     byId("content").value = message.content || "";
     renderMessageEditor(message.content || "", message.guildId);
     byId("scheduledFor").value = toLocalInput(message.scheduledFor);
+    byId("authorName").value = embed.authorName || "";
+    byId("authorIconUrl").value = embed.authorIconUrl || "";
+    byId("authorUrl").value = embed.authorUrl || "";
     byId("embedTitle").value = embed.title || "";
     byId("description").value = embed.description || "";
     byId("imageUrl").value = embed.imageUrl || "";
     byId("thumbnailUrl").value = embed.thumbnailUrl || "";
     byId("footer").value = embed.footer || "";
+    byId("footerIconUrl").value = embed.footerIconUrl || "";
+    if (typeof hydrateEmbedMentionFields === "function") hydrateEmbedMentionFields();
     setColor("#" + (embed.color ?? 5793266).toString(16).padStart(6, "0"));
     populateRecurrence(message.recurrence);
     setEditorMode(true);
@@ -183,6 +198,7 @@ function reset() {
     selectedMentions = [];
     recurrenceAnchor = null;
     byId("form").reset();
+    if (typeof hydrateEmbedMentionFields === "function") hydrateEmbedMentionFields();
     byId("messageEditor").innerHTML = "";
     byId("content").value = "";
     renderMentionChips();
@@ -190,6 +206,20 @@ function reset() {
     updateMentionSearch();
     byId("mentionResults").hidden = true;
     byId("id").value = "";
+    byId("sourceTemplateId").value = "";
+    byId("sourceTemplateVersion").value = "";
+    byId("editorPurpose").value = "message";
+    byId("templateName").value = "";
+    byId("templateDescription").value = "";
+    byId("templateNameField").hidden = true;
+    byId("templateName").required = false;
+    byId("templateDescriptionField").hidden = true;
+    byId("scheduleSection").hidden = false;
+    byId("name").required = true;
+    byId("scheduledFor").required = true;
+    byId("channelId").required = true;
+    byId("channelLabel").textContent = "Channel";
+    byId("channelRequired").hidden = false;
     byId("channelId").disabled = true;
     byId("channelId").innerHTML = '<option value="">Select a server first</option>';
     setEditorMode(false);
@@ -218,8 +248,10 @@ byId("guildId").addEventListener("change", () => {
 byId("filter").addEventListener("change", loadMessages);
 byId("clearButton").addEventListener("click", () => {
     const wasEditing = Boolean(byId("id").value);
+    const wasTemplate = byId("editorPurpose").value === "template";
     reset();
-    if (wasEditing) showView("manage");
+    if (wasTemplate) showView("templates");
+    else if (wasEditing) showView("manage");
 });
 byId("items").addEventListener("click", async (event) => {
     if (event.target.dataset.edit) edit(event.target.dataset.edit);
@@ -235,17 +267,19 @@ byId("items").addEventListener("click", async (event) => {
 byId("form").addEventListener("submit", async (event) => {
     event.preventDefault();
     const id = byId("id").value;
+    const savingTemplate = byId("editorPurpose").value === "template";
     byId("submit").disabled = true;
     setNotice("Saving…");
     try {
-        await request(api + (id ? `/${id}` : ""), {
+        await request(savingTemplate ? templateApi + (id ? "/" + id : "") : api + (id ? "/" + id : ""), {
             method: id ? "PUT" : "POST",
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(formData()),
+            body: JSON.stringify(savingTemplate ? templateFormData() : formData()),
         });
         reset();
-        showView("manage");
-        showManageNotice(id ? "Message updated." : "Message created and added to the queue.");
+        showView(savingTemplate ? "templates" : "manage");
+        if (savingTemplate) showTemplateNotice(id ? "Template updated." : "Template created.");
+        else showManageNotice(id ? "Message updated." : "Message created and added to the queue.");
         setNotice("");
     } catch (error) {
         setNotice(error.message, true);
@@ -284,16 +318,22 @@ updateCounters();
 function showView(view) {
     const managing = view === "manage";
     const account = view === "account";
-    byId("createView").hidden = managing || account;
+    const templatesView = view === "templates";
+    byId("createView").hidden = managing || account || templatesView;
     byId("manageView").hidden = !managing;
+    byId("templatesView").hidden = !templatesView;
     byId("accountView").hidden = !account;
     document.querySelectorAll("[data-view]").forEach((button) => {
         button.classList.toggle("active", button.dataset.view === view);
     });
     if (managing) loadMessages();
+    if (templatesView) loadTemplates();
 }
 document.querySelectorAll("[data-view]").forEach((button) => {
     button.addEventListener("click", () => {
+        if (button.dataset.view === "create" && (byId("editorPurpose").value === "template" || byId("id").value || byId("sourceTemplateId").value)) {
+            reset();
+        }
         showView(button.dataset.view);
     });
 });
@@ -326,7 +366,7 @@ function showManageNotice(message) {
 
 function setEditorMode(editing) {
     byId("formTitle").textContent = editing ? "Edit scheduled message" : "New scheduled message";
-    byId("editorNavButton").textContent = editing ? "Edit message" : "New message";
+    byId("editorNavButton").textContent = "New message";
     byId("submit").querySelector("span").textContent = editing ? "Update message" : "Schedule message";
     byId("clearButton").textContent = editing ? "Cancel editing" : "Reset";
 }
@@ -336,6 +376,7 @@ function mentionToken(mention) {
 }
 function composedContent() {
     const content = byId("content").value.trim();
+    if (messageType() === "embed") return "";
     if (messageType() !== "embed" && !content) throw new Error("Write a message or select a mention.");
     if (content.length > 2000) throw new Error("Message text and mentions exceed Discord’s 2,000 character limit.");
     return content;
@@ -545,6 +586,27 @@ function inlineMatches(query) {
         .filter((item) => item.label.toLocaleLowerCase().includes(query))
         .slice(0, 10);
 }
+function positionMentionPopup(results, caret, anchorWidth) {
+    const width = Math.max(240, Math.min(anchorWidth || 420, 420));
+    const left = Math.max(8, Math.min(caret.left, window.innerWidth - width - 8));
+    const top = Math.max(8, caret.bottom + 5);
+    const availableHeight = Math.max(80, window.innerHeight - top - 8);
+    results.style.position = "fixed";
+    results.style.right = "auto";
+    results.style.left = left + "px";
+    results.style.top = top + "px";
+    results.style.width = width + "px";
+    results.style.maxHeight = Math.min(280, availableHeight) + "px";
+}
+function positionInlineMentionResults() {
+    const results = byId("inlineMentionResults");
+    if (results.hidden || !inlineMentionContext) return;
+    const rects = inlineMentionContext.range.getClientRects();
+    const caretRect = rects.length ? rects[rects.length - 1] : inlineMentionContext.range.getBoundingClientRect();
+    const editorRect = byId("messageEditor").getBoundingClientRect();
+    positionMentionPopup(results, { left: caretRect.right || caretRect.left, bottom: caretRect.bottom }, editorRect.width);
+}
+
 function renderInlineMentionResults() {
     inlineMentionContext = findInlineMentionContext();
     const results = byId("inlineMentionResults");
@@ -563,6 +625,7 @@ function renderInlineMentionResults() {
               .join("")
         : "<p>No matching members or roles.</p>";
     results.hidden = false;
+    positionInlineMentionResults();
 }
 function insertInlineMention(index = inlineMentionIndex) {
     if (!inlineMentionContext) return;
@@ -590,6 +653,16 @@ byId("messageEditor").addEventListener("input", () => {
     updateCounters();
     inlineMentionIndex = 0;
     renderInlineMentionResults();
+});
+byId("messageEditor").addEventListener("click", () => {
+    inlineMentionIndex = 0;
+    renderInlineMentionResults();
+});
+byId("messageEditor").addEventListener("keyup", (event) => {
+    if (["ArrowLeft", "ArrowRight", "Home", "End"].includes(event.key)) {
+        inlineMentionIndex = 0;
+        renderInlineMentionResults();
+    }
 });
 byId("messageEditor").addEventListener("keydown", (event) => {
     const results = byId("inlineMentionResults");
@@ -628,6 +701,8 @@ byId("inlineMentionResults").addEventListener("mousedown", (event) => {
 document.addEventListener("click", (event) => {
     if (!event.target.closest(".message-editor-wrap")) byId("inlineMentionResults").hidden = true;
 });
+window.addEventListener("resize", positionInlineMentionResults);
+window.addEventListener("scroll", positionInlineMentionResults, true);
 
 function setPasswordNotice(message, error = false) {
     byId("passwordNotice").textContent = message;

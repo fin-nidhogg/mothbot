@@ -1,13 +1,15 @@
 const ScheduledMessage = require('../models/ScheduledMessage');
-const editable = ['name', 'guildId', 'channelId', 'content', 'embed', 'scheduledFor', 'recurrence'];
+const MessageTemplate = require('../models/MessageTemplate');
+const { normalizeEmbed, validateMessageContent } = require('../models/messageContent');
+const { writeAdminAudit } = require('../services/adminAuditService');
+const editable = ['name', 'guildId', 'channelId', 'content', 'embed', 'scheduledFor', 'recurrence', 'sourceTemplateId', 'sourceTemplateVersion'];
 const payload = body => editable.reduce((result, key) => (
     body[key] === undefined ? result : { ...result, [key]: body[key] }
 ), {});
 
 function invalid(value) {
-    const embed = value.embed;
-    const hasEmbed = embed && (embed.title || embed.description || embed.imageUrl || embed.thumbnailUrl || embed.footer || embed.fields?.length);
-    if (!(value.content || '').trim() && !hasEmbed) return 'Message must contain text or an embed.';
+    const contentError = validateMessageContent(value);
+    if (contentError) return contentError;
     if (!value.scheduledFor || Number.isNaN(new Date(value.scheduledFor).getTime())) return 'Invalid scheduledFor date.';
     if (value.recurrence) {
         if (!['weekly', 'monthly'].includes(value.recurrence.frequency)) return 'Invalid recurrence frequency.';
@@ -17,6 +19,7 @@ function invalid(value) {
     }
 }
 function normalize(value) {
+    if (value.embed !== undefined) value.embed = normalizeEmbed(value.embed);
     if (value.recurrence) {
         value.recurrence = {
             ...value.recurrence,
@@ -45,9 +48,21 @@ exports.get = async (req, res) => {
 exports.create = async (req, res) => {
     try {
         const value = normalize(payload(req.body));
+        if (value.sourceTemplateId) {
+            const template = await MessageTemplate.findOne({ _id: value.sourceTemplateId, status: 'active' }).lean();
+            if (!template) return res.status(400).json({ error: 'Active source template not found.' });
+            if (value.sourceTemplateVersion !== template.__v) return res.status(409).json({ error: 'The source template changed. Reload it before scheduling.' });
+            if (template.guildId !== value.guildId) return res.status(400).json({ error: 'Template and scheduled message must use the same Discord server.' });
+            value.sourceTemplateName = template.name;
+            value.sourceTemplateVersion = template.__v;
+        }
         const error = invalid(value);
         if (error) return res.status(400).json({ error });
-        res.status(201).json({ message: await ScheduledMessage.create(value) });
+        const message = await ScheduledMessage.create(value);
+        if (req.adminUser && message.sourceTemplateId) {
+            await writeAdminAudit(req, 'template.use', 'MessageTemplate', message.sourceTemplateId, { scheduledMessageId: message._id });
+        }
+        res.status(201).json({ message });
     } catch (error) { res.status(400).json({ error: error.message }); }
 };
 exports.update = async (req, res) => {
