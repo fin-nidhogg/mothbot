@@ -5,7 +5,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width,initial-scale=1">
     <title>Scheduled messages · Mothbot Admin</title>
-    <link rel="stylesheet" href="/admin-assets/styles.css?v=account-glass-3">
+    <link rel="stylesheet" href="/admin-assets/styles.css?v=mentions-unified-14">
 </head>
 
 <body>
@@ -16,11 +16,11 @@
                 <h1>Scheduled messages</h1>
                 <p>Compose once. Let the bot deliver it on time.</p>
             </div>
-            <div class="admin-user"><button type="button" class="user-name-button" id="adminUser" data-view="account" aria-label="Open account settings"></button><button type="button" class="ghost" id="logoutButton">Sign out</button></div>
+            <div class="admin-user"><button type="button" class="user-name-button" data-view="account" aria-label="Open account settings"><span class="account-button-label">Account</span><span class="account-user-name" id="adminUser"></span></button><button type="button" class="ghost" id="logoutButton">Sign out</button></div>
         </header>
         <nav class="view-nav" aria-label="Scheduled message views"><button type="button" class="active"
                 id="editorNavButton" data-view="create">New message</button><button type="button"
-                data-view="manage">Scheduled messages</button></nav>
+                data-view="manage">Scheduled messages</button><button type="button" data-view="templates">Templates</button></nav>
         <div id="createView" class="view">
             <section class="panel composer">
                 <div class="section-head">
@@ -29,7 +29,7 @@
                         <p>Fields marked <span class="required">*</span> are required</p>
                     </div>
                 </div>
-                <form id="form"><input type="hidden" id="id">
+                <form id="form"><input type="hidden" id="id"><input type="hidden" id="editorPurpose" value="message"><input type="hidden" id="sourceTemplateId"><input type="hidden" id="sourceTemplateVersion">
                     <section class="form-section">
                         <div class="form-section-title">
                             <div>
@@ -37,10 +37,10 @@
                                 <p>Choose where the bot should post.</p>
                             </div>
                         </div>
-                        <div class="fields two"><label>Server <span class="required">*</span><select id="guildId"
+                        <div id="templateNameField" hidden><label>Template name <span class="required">*</span><input id="templateName" required maxlength="120" placeholder="e.g. Weekly community update"></label></div><div id="templateDescriptionField" hidden><label>Template description <span class="counter">Optional</span><textarea id="templateDescription" maxlength="500" rows="2" placeholder="Explain when this template should be used…"></textarea></label></div><div class="fields two"><label>Server <span class="required">*</span><select id="guildId"
                                     required>
                                     <option value="">Loading servers…</option>
-                                </select></label><label>Channel <span class="required">*</span><select id="channelId"
+                                </select></label><label><span id="channelLabel">Channel</span> <span class="required" id="channelRequired">*</span><select id="channelId"
                                     required disabled>
                                     <option value="">Select a server first</option>
                                 </select></label></div>
@@ -62,8 +62,9 @@
                             <div id="mentionResults"></div>
                             <div id="mentionChips"></div>
                         </div>
-                        <div id="textFields" class="block"><label>Message text <span class="required"
+                        <div id="textFields" class="block"><label>Message text <small class="message-placement-help" id="messagePlacementHelp" hidden>Shown above the embed in Text + embed mode.</small> <span class="required"
                                     id="textRequired">*</span><span class="counter" id="contentCount">0 / 2,000</span>
+                                <div class="markdown-toolbar" data-markdown-target="messageEditor" aria-label="Message formatting"></div>
                                 <div class="message-editor-wrap">
                                     <div id="messageEditor" class="message-editor" contenteditable="true" role="textbox"
                                         aria-multiline="true"
@@ -73,8 +74,9 @@
                             </label></div>
                         <div id="embedFields" class="block" hidden>
                             <div class="divider"><span>Embed</span></div>
+                            <details><summary>Author <span>Optional</span></summary><label>Author name<input id="authorName" data-mention-input maxlength="256" placeholder="e.g. minor action"></label><div class="fields two"><label>Author icon URL<input id="authorIconUrl" type="url" placeholder="https://…"></label><label>Author link URL<input id="authorUrl" type="url" placeholder="https://…"></label></div></details>
                             <div class="fields two"><label>Title <span class="counter" id="titleCount">0 /
-                                        256</span><input id="embedTitle" maxlength="256"
+                                        256</span><input id="embedTitle" data-mention-input maxlength="256"
                                         placeholder="A short, clear headline"></label><label>Accent color<div
                                         class="color-control"><input id="color" type="color" value="#5865f2"
                                             aria-label="Choose color"><input id="colorHex" value="#5865F2" maxlength="7"
@@ -87,23 +89,22 @@
                                     title="Alert"></button><button type="button" data-color="#2B2D31"
                                     title="Graphite"></button></div>
                             <label>Description <span class="required">*</span><span class="counter"
-                                    id="descriptionCount">0 / 4,096</span><textarea id="description" maxlength="4096"
+                                    id="descriptionCount">0 / 4,096</span><div class="markdown-toolbar" data-markdown-target="description" aria-label="Description formatting"></div><textarea id="description" data-mention-input maxlength="4096"
                                     rows="4" placeholder="Add the details here…"></textarea></label>
                             <details>
                                 <summary>Image, thumbnail and footer <span>Optional</span></summary>
                                 <div class="fields two"><label>Image URL<input id="imageUrl" type="url"
                                             placeholder="https://…"></label><label>Thumbnail URL<input id="thumbnailUrl"
-                                            type="url" placeholder="https://…"></label></div><label>Footer<input
-                                        id="footer" maxlength="2048" placeholder="Optional footer text"></label>
+                                            type="url" placeholder="https://…"></label></div><div class="fields two"><label>Footer<textarea id="footer" data-mention-input maxlength="2048" rows="3" placeholder="Optional footer text"></textarea></label><label>Footer icon URL<input id="footerIconUrl" type="url" placeholder="https://…"></label></div>
                             </details>
-                            <div class="preview-label">Discord preview</div>
-                            <div class="preview" id="preview">
-                                <div class="preview-title">Embed preview</div>
-                                <p>Add content to preview the embed.</p>
-                            </div>
+                        </div>
+                        <div class="preview-label">Discord preview</div><div id="previewMessageText" class="preview-message-text" hidden></div>
+                        <div class="preview" id="preview">
+                            <div class="preview-title">Embed preview</div>
+                            <p>Add content to preview the embed.</p>
                         </div>
                     </section>
-                    <section class="form-section last">
+                    <section class="form-section last" id="scheduleSection">
                         <div class="form-section-title">
                             <div>
                                 <h3>Schedule</h3>
@@ -185,6 +186,15 @@
                 </div>
             </section>
         </div>
+        <div id="templatesView" class="view" hidden>
+            <section class="panel queue">
+                <div class="manage-header"><div><h2>Message templates</h2><p><span id="templateCount">Loading…</span></p></div><div class="manage-actions"><button type="button" class="ghost" id="refreshTemplatesButton">Refresh</button><button type="button" class="primary" id="createTemplateButton">+ New template</button></div></div>
+                <div class="manage-notice" id="templateNotice" hidden></div>
+                <div class="status-tabs" aria-label="Filter templates"><button type="button" class="active" data-template-status="active">Active</button><button type="button" data-template-status="archived">Archived</button><button type="button" data-template-status="">All</button></div>
+                <div class="fields two template-filters"><label>Search templates<input id="templateSearch" type="search" placeholder="Search by name…"></label></div>
+                <div id="templateItems" class="items"><p class="empty">Loading templates…</p></div>
+            </section>
+        </div>
         <div id="accountView" class="view" hidden>
             <section class="panel account-panel">
                 <div class="section-head"><div><h2>Change password</h2><p>Confirm your current password before choosing a new one.</p></div></div>
@@ -200,7 +210,11 @@
             </section>
         </div>
     </main>
-    <script src="/admin-assets/app.js" defer></script>
+    <div class="inline-mention-results embed-mention-results" id="embedMentionResults" hidden></div>
+    <script src="/admin-assets/app.js?v=mentions-unified-14" defer></script>
+    <script src="/admin-assets/templates.js?v=mentions-unified-14" defer></script>
+    <script src="/admin-assets/embed-enhancements.js?v=mentions-unified-14" defer></script>
+    <script src="/admin-assets/formatting.js?v=mentions-unified-14" defer></script>
 </body>
 
 </html>

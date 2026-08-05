@@ -21,14 +21,22 @@ function discordPayload(message) {
     if (message.content) result.content = message.content;
     if (message.embed) {
         const e = message.embed;
+        const cleanUrl = value => typeof value === 'string' && value.trim() ? value.trim() : null;
+        const authorIconUrl = cleanUrl(e.authorIconUrl);
+        const authorUrl = cleanUrl(e.authorUrl);
+        const embedUrl = cleanUrl(e.url);
+        const thumbnailUrl = cleanUrl(e.thumbnailUrl);
+        const imageUrl = cleanUrl(e.imageUrl);
+        const footerIconUrl = cleanUrl(e.footerIconUrl);
         const embed = new EmbedBuilder();
+        if (e.authorName) embed.setAuthor({ name: e.authorName, ...(authorIconUrl ? { iconURL: authorIconUrl } : {}), ...(authorUrl ? { url: authorUrl } : {}) });
         if (e.title) embed.setTitle(e.title);
         if (e.description) embed.setDescription(e.description);
-        if (e.url) embed.setURL(e.url);
+        if (embedUrl) embed.setURL(embedUrl);
         if (Number.isInteger(e.color)) embed.setColor(e.color);
-        if (e.thumbnailUrl) embed.setThumbnail(e.thumbnailUrl);
-        if (e.imageUrl) embed.setImage(e.imageUrl);
-        if (e.footer) embed.setFooter({ text: e.footer });
+        if (thumbnailUrl) embed.setThumbnail(thumbnailUrl);
+        if (imageUrl) embed.setImage(imageUrl);
+        if (e.footer) embed.setFooter({ text: e.footer, ...(footerIconUrl ? { iconURL: footerIconUrl } : {}) });
         if (e.fields?.length) embed.addFields(e.fields);
         result.embeds = [embed];
     }
