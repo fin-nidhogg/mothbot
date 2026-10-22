@@ -1,4 +1,5 @@
 const cron = require('node-cron');
+const { Events } = require('discord.js');
 const config = require('../config');
 const { sendDailyActiveUsers } = require('../cronjobs/calculateDAU');
 const { startWebsiteMonitor } = require('../cronjobs/monitorWebsite');
@@ -6,7 +7,7 @@ const { startScheduledMessageWorker } = require('../cronjobs/sendScheduledMessag
 const runmode = process.env.NODE_ENV;
 
 module.exports = {
-    name: 'ready',
+    name: Events.ClientReady,
     once: true,
     execute(client) {
         const localTime = new Date().toLocaleString('fi-FI', { timeZone: config.timeZone });
