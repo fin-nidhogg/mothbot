@@ -34,13 +34,22 @@ function getErrorDetails(error) {
     };
 }
 
+function setEmbedUrlIfValid(embed, url) {
+    try {
+        embed.setURL(url);
+    } catch (error) {
+        console.warn(`[WebsiteMonitor] Discord rejected embed URL ${url}: ${error.message}`);
+    }
+
+    return embed;
+}
+
 function createDownEmbed(monitor, result) {
     const details = getErrorDetails(result.error);
 
-    return new EmbedBuilder()
+    const embed = new EmbedBuilder()
         .setColor(0xd83c3e)
         .setTitle(`Website down: ${monitor.name}`)
-        .setURL(monitor.url)
         .setDescription('The monitor detected an issue. No further downtime alerts will be sent until the website has recovered.')
         .addFields(
             { name: 'Website', value: monitor.url },
@@ -50,13 +59,14 @@ function createDownEmbed(monitor, result) {
             { name: 'Failed checks', value: `${result.failureCount}/${monitor.failureThreshold}`, inline: true },
         )
         .setTimestamp();
+
+    return setEmbedUrlIfValid(embed, monitor.url);
 }
 
 function createUpEmbed(monitor, result) {
-    return new EmbedBuilder()
+    const embed = new EmbedBuilder()
         .setColor(0x2ecc71)
         .setTitle(`Website recovered: ${monitor.name}`)
-        .setURL(monitor.url)
         .setDescription('The website is responding again. Monitoring has returned to normal.')
         .addFields(
             { name: 'Website', value: monitor.url },
@@ -64,6 +74,8 @@ function createUpEmbed(monitor, result) {
             { name: 'Response time', value: formatDuration(result.durationMs), inline: true },
         )
         .setTimestamp();
+
+    return setEmbedUrlIfValid(embed, monitor.url);
 }
 
 async function checkWebsite(monitor) {
