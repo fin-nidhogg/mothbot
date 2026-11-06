@@ -1,37 +1,37 @@
 {
-  "name": "mothbot",
-  "version": "1.0.0",
-  "description": "A discord bot for very special community <3",
-  "main": "bot.js",
-  "scripts": {
-    "start:dev-win": "cross-env NODE_ENV=development node bot.js",
-    "start:prod-win": "cross-env NODE_ENV=production node bot.js",
-    "start:dev": "NODE_ENV=development node bot.js",
-    "start:prod": "NODE_ENV=production node bot.js",
-    "start:dev-register": "cross-env NODE_ENV=development node register-commands.js",
-    "start:prod-register": "NODE_ENV=production node register-commands.js"
-  },
-  "keywords": [
-    "bot",
-    "moth",
-    "discord"
-  ],
-  "author": "Pretelea Nidhogg",
-  "license": "ISC",
-  "dependencies": {
-    "axios": "^1.20.0",
-    "cheerio": "^1.2.0",
-    "discord.js": "^14.27.0",
-    "dotenv": "^16.6.1",
-    "luxon": "^3.7.2",
-    "moment": "^2.31.0",
-    "mongodb": "^6.21.0",
-    "node-cron": "^4.6.0"
-  },
-  "devDependencies": {
-    "cross-env": "^7.0.3"
-  },
-  "overrides": {
-    "undici": "6.28.1"
-  }
+    "name": "mothbot",
+    "version": "1.0.0",
+    "description": "A discord bot for very special community <3",
+    "main": "bot.js",
+    "scripts": {
+        "start:dev-win": "cross-env NODE_ENV=development node bot.js",
+        "start:prod-win": "cross-env NODE_ENV=production node bot.js",
+        "start:dev": "NODE_ENV=development node bot.js",
+        "start:prod": "NODE_ENV=production node bot.js",
+        "start:dev-register": "cross-env NODE_ENV=development node register-commands.js",
+        "start:prod-register": "NODE_ENV=production node register-commands.js"
+    },
+    "keywords": [
+        "bot",
+        "moth",
+        "discord"
+    ],
+    "author": "Pretelea Nidhogg",
+    "license": "ISC",
+    "dependencies": {
+        "axios": "^1.20.0",
+        "cheerio": "^1.2.0",
+        "discord.js": "^14.27.0",
+        "dotenv": "^16.6.1",
+        "luxon": "^3.7.2",
+        "moment": "^2.31.0",
+        "mongodb": "^6.21.0",
+        "node-cron": "^4.6.0"
+    },
+    "devDependencies": {
+        "cross-env": "^7.0.3"
+    },
+    "overrides": {
+        "undici": "^6.29.1"
+    }
 }
