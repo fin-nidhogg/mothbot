@@ -22,7 +22,7 @@
     "express": "^4.22.3",
     "helmet": "^8.3.0",
     "moment": "^2.31.0",
-    "mongoose": "^8.24.6"
+    "mongoose": "^8.24.7"
   },
   "devDependencies": {
     "cross-env": "^7.0.3"
